@@ -38,6 +38,8 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
 
     private static final Logger s_logger = LoggerFactory.getLogger(GwtCloudServiceImpl.class);
 
+    private static final String KURA_CLOUD_SERVICE_FACTORY_PID = "kura.cloud.service.factory.pid";
+
     @Override
     public List<GwtCloudConnectionEntry> findCloudServices() throws GwtKuraException {
         List<GwtCloudConnectionEntry> pairs = new ArrayList<GwtCloudConnectionEntry>();
@@ -49,11 +51,13 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
             String factoryPid = (String) cloudServiceReference.getProperty("service.factoryPid");
             CloudService cloudService = ServiceLocator.getInstance().getService(cloudServiceReference);
 
-            GwtCloudConnectionEntry cloudConnectionEntry = new GwtCloudConnectionEntry();
-            cloudConnectionEntry.setConnectionStatus(cloudService.isConnected());
-            cloudConnectionEntry.setCloudFactoryPid(factoryPid);
-            cloudConnectionEntry.setCloudServicePid(cloudServicePid);
-            pairs.add(cloudConnectionEntry);
+            if (cloudServiceReference.getProperty(KURA_CLOUD_SERVICE_FACTORY_PID) != null) {
+                GwtCloudConnectionEntry cloudConnectionEntry = new GwtCloudConnectionEntry();
+                cloudConnectionEntry.setConnectionStatus(cloudService.isConnected());
+                cloudConnectionEntry.setCloudFactoryPid(factoryPid);
+                cloudConnectionEntry.setCloudServicePid(cloudServicePid);
+                pairs.add(cloudConnectionEntry);
+            }
             ServiceLocator.getInstance().ungetService(cloudServiceReference);
         }
         return pairs;

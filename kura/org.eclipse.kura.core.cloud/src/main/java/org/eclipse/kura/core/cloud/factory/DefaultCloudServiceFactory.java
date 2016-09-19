@@ -150,6 +150,7 @@ import org.osgi.service.component.ComponentConstants;
 public class DefaultCloudServiceFactory implements CloudServiceFactory {
 
     private static final String FACTORY_PID = "org.eclipse.kura.core.cloud.factory.DefaultCloudServiceFactory";
+    private static final String KURA_SERVICES_HIDE = "kura.services.hide";
 
     // The following constants must match the factory component definitions
     private static final String CLOUD_SERVICE_FACTORY_PID = "org.eclipse.kura.cloud.CloudService";
@@ -203,21 +204,21 @@ public class DefaultCloudServiceFactory implements CloudServiceFactory {
             String name = DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
             cloudServiceProperties.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, dataServicePid));
             cloudServiceProperties.put(KURA_CLOUD_SERVICE_FACTORY_PID, FACTORY_PID);
+            cloudServiceProperties.put(KURA_SERVICES_HIDE, "true");
 
-            m_configurationService.createFactoryConfiguration(CLOUD_SERVICE_FACTORY_PID, pid, cloudServiceProperties,
-                    false);
+            m_configurationService.createFactoryConfiguration(CLOUD_SERVICE_FACTORY_PID, pid, cloudServiceProperties, false);
 
             // create the DataService layer and set the selective dependency on the DataTransportService PID
             Map<String, Object> dataServiceProperties = new HashMap<String, Object>();
             name = DATA_TRANSPORT_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
             dataServiceProperties.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, dataTransportServicePid));
-            dataServiceProperties.put(KURA_CLOUD_SERVICE_FACTORY_PID, FACTORY_PID);
+            dataServiceProperties.put(KURA_SERVICES_HIDE, "true");
 
             m_configurationService.createFactoryConfiguration(DATA_SERVICE_FACTORY_PID, dataServicePid, dataServiceProperties, false);
 
             // create the DataTransportService layer and take a snapshot
             Map<String, Object> dataTransportServiceProperties = new HashMap<String, Object>();
-            dataTransportServiceProperties.put(KURA_CLOUD_SERVICE_FACTORY_PID, FACTORY_PID);
+            dataTransportServiceProperties.put(KURA_SERVICES_HIDE, "true");
             
             m_configurationService.createFactoryConfiguration(DATA_TRANSPORT_SERVICE_FACTORY_PID, dataTransportServicePid, dataTransportServiceProperties, true);
         } else {

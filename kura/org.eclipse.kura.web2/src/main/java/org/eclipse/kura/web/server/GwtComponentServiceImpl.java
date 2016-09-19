@@ -38,7 +38,7 @@ import org.eclipse.kura.web.shared.service.GwtComponentService;
 public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements GwtComponentService {
 
     private static final String SERVICE_FACTORY_PID = "service.factoryPid";
-    private static final String KURA_CLOUD_SERVICE_FACTORY_PID = "kura.cloud.service.factory.pid";
+    private static final String KURA_SERVICES_HIDE = "kura.services.hide";
     
     private static final long serialVersionUID = -4176701819112753800L;
 
@@ -65,7 +65,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                     continue;
                 }
                 
-                if (config.getConfigurationProperties().get(KURA_CLOUD_SERVICE_FACTORY_PID) != null) {
+                if (config.getConfigurationProperties().get(KURA_SERVICES_HIDE) != null) {
                     continue;
                 }
 

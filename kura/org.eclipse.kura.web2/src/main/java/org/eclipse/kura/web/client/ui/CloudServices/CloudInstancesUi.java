@@ -217,14 +217,14 @@ public class CloudInstancesUi extends Composite {
             @Override
             public String getValue(GwtCloudConnectionEntry object) {
                 if (object.isConnected()) {
-                    return MSG.yesButton();
+                    return MSG.connected();
                 } else {
-                    return MSG.noButton();
+                    return MSG.disconnected();
                 }
             }
         };
         col1.setCellStyleNames("status-table-row");
-        connectionsGrid.addColumn(col1, MSG.connectedLabel());
+        connectionsGrid.addColumn(col1, MSG.netIPv4Status());
 
         TextColumn<GwtCloudConnectionEntry> col2 = new TextColumn<GwtCloudConnectionEntry>() {
 
