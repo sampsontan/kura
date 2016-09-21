@@ -37,6 +37,8 @@ import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -115,6 +117,16 @@ public class CloudInstancesUi extends Composite {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 cloudServicesUi.onSelectionChange();
+            }
+        });
+
+        cloudFactoriesPids.addChangeHandler(new ChangeHandler() {
+
+            @Override
+            public void onChange(ChangeEvent event) {
+                final String factoryPid = cloudFactoriesPids.getSelectedValue();
+                getSuggestedCloudServicePid(factoryPid);
+
             }
         });
 
@@ -277,6 +289,7 @@ public class CloudInstancesUi extends Composite {
                     public void onFailure(Throwable caught) {
                         EntryClassUi.hideWaitModal();
                         FailureHandler.handle(caught, gwtCloudService.getClass().getSimpleName());
+                        newConnectionModal.hide();
                     }
 
                     @Override
@@ -314,6 +327,7 @@ public class CloudInstancesUi extends Composite {
             public void onFailure(Throwable caught) {
                 EntryClassUi.hideWaitModal();
                 FailureHandler.handle(caught, gwtCloudService.getClass().getSimpleName());
+                newConnectionModal.hide();
             }
 
             @Override
@@ -321,6 +335,8 @@ public class CloudInstancesUi extends Composite {
                 for (GwtGroupedNVPair pair : result) {
                     cloudFactoriesPids.addItem(pair.getValue());
                 }
+                String selectedFactoryPid = cloudFactoriesPids.getSelectedValue();
+                getSuggestedCloudServicePid(selectedFactoryPid);
                 EntryClassUi.hideWaitModal();
             }
         });
@@ -452,4 +468,20 @@ public class CloudInstancesUi extends Composite {
         modal.show();
     }
 
+    private void getSuggestedCloudServicePid(final String factoryPid) {
+        gwtCloudService.getSuggestedCloudServicePid(factoryPid, new AsyncCallback<String>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                FailureHandler.handle(caught, gwtCloudService.getClass().getSimpleName());
+            }
+
+            @Override
+            public void onSuccess(String result) {
+                if (result != null) {
+                    cloudServicePid.setPlaceholder(MSG.exampleGiven() + " " + result);
+                }
+            }
+        });
+    }
 }

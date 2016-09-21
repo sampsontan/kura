@@ -13,6 +13,7 @@
 package org.eclipse.kura.web.server;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -20,8 +21,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
+import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Icon;
 import org.eclipse.kura.configuration.metatype.OCD;
@@ -34,17 +37,24 @@ import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
+import org.osgi.framework.ServiceReference;
 
 public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements GwtComponentService {
 
+    private static final String KURA_SERVICE_PID = "kura.service.pid";
     private static final String SERVICE_FACTORY_PID = "service.factoryPid";
-    private static final String KURA_SERVICES_HIDE = "kura.services.hide";
+    private static final String KURA_UI_SERVICE_HIDE = "kura.ui.service.hide";
     
     private static final long serialVersionUID = -4176701819112753800L;
 
     @Override
     public List<GwtConfigComponent> findServicesConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
+        List<String> hidePidsList = new ArrayList<String>();
+        
+        //identify the services to hide by component configuration property
+        fillServicesToHideList(hidePidsList);
+        
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         List<GwtConfigComponent> gwtConfigs = new ArrayList<GwtConfigComponent>();
         try {
@@ -56,8 +66,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             for (ComponentConfiguration config : configs) {
 
                 // ignore items we want to hide
-                // TODO: the check for cloud services should be improved
-                if (config.getPid().endsWith("SystemPropertiesService") ||
+                if (hidePidsList.contains(config.getPid()) ||
+                        config.getPid().endsWith("SystemPropertiesService") ||
                         config.getPid().endsWith("NetworkAdminService") ||
                         config.getPid().endsWith("NetworkConfigurationService") ||
                         config.getPid().endsWith("SslManagerService") ||
@@ -65,10 +75,6 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                     continue;
                 }
                 
-                if (config.getConfigurationProperties().get(KURA_SERVICES_HIDE) != null) {
-                    continue;
-                }
-
                 convertComponentConfigurationByOcd(gwtConfigs, config);
             }
         } catch (Throwable t) {
@@ -309,8 +315,8 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             }
 
             // Force kura.service.pid into properties, if originally present
-            if (backupConfigProp.get("kura.service.pid") != null) {
-                properties.put("kura.service.pid", backupConfigProp.get("kura.service.pid"));
+            if (backupConfigProp.get(KURA_SERVICE_PID) != null) {
+                properties.put(KURA_SERVICE_PID, backupConfigProp.get(KURA_SERVICE_PID));
             }
             //
             // apply them
@@ -566,6 +572,30 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             } else {
                 return pid;
             }
+        }
+    }
+    
+    private void fillServicesToHideList(List<String> hidePidsList) throws GwtKuraException {
+        Collection<ServiceReference<ConfigurableComponent>> configurableComponentReferences = ServiceLocator.getInstance().getServiceReferences(ConfigurableComponent.class, null);
+        
+        for (ServiceReference<ConfigurableComponent> configurableComponentReference : configurableComponentReferences) {
+            Object propertyObject = configurableComponentReference.getProperty(KURA_SERVICE_PID);
+            if (configurableComponentReference.getProperty(KURA_UI_SERVICE_HIDE) != null && propertyObject != null) {
+                String servicePid = (String) propertyObject;
+                hidePidsList.add(servicePid);
+            }
+            ServiceLocator.getInstance().ungetService(configurableComponentReference);
+        }
+        
+        Collection<ServiceReference<SelfConfiguringComponent>> selfConfiguringComponentReferences = ServiceLocator.getInstance().getServiceReferences(SelfConfiguringComponent.class, null);
+        
+        for (ServiceReference<SelfConfiguringComponent> selfConfiguringComponentReference : selfConfiguringComponentReferences) {
+            Object propertyObject = selfConfiguringComponentReference.getProperty(KURA_SERVICE_PID);
+            if (selfConfiguringComponentReference.getProperty(KURA_UI_SERVICE_HIDE) != null && propertyObject != null) {
+                String servicePid = (String) propertyObject;
+                hidePidsList.add(servicePid);
+            }
+            ServiceLocator.getInstance().ungetService(selfConfiguringComponentReference);
         }
     }
 }

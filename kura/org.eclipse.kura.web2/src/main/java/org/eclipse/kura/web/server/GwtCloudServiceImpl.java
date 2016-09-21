@@ -31,8 +31,16 @@ import org.slf4j.LoggerFactory;
 
 public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements GwtCloudService {
 
+    private static final String COMPONENT_NAME = "component.name";
+
+    private static final String SERVICE_FACTORY_PID = "service.factoryPid";
+
+    private static final String KURA_SERVICE_PID = "kura.service.pid";
+
+    private static final String KURA_UI_CSF_PID_DEFAULT = "kura.ui.csf.pid.default";
+
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 2595835826149606703L;
 
@@ -47,8 +55,8 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
                 .getServiceReferences(CloudService.class, null);
 
         for (ServiceReference<CloudService> cloudServiceReference : cloudServiceReferences) {
-            String cloudServicePid = (String) cloudServiceReference.getProperty("kura.service.pid");
-            String factoryPid = (String) cloudServiceReference.getProperty("service.factoryPid");
+            String cloudServicePid = (String) cloudServiceReference.getProperty(KURA_SERVICE_PID);
+            String factoryPid = (String) cloudServiceReference.getProperty(SERVICE_FACTORY_PID);
             CloudService cloudService = ServiceLocator.getInstance().getService(cloudServiceReference);
 
             if (cloudServiceReference.getProperty(KURA_CLOUD_SERVICE_FACTORY_PID) != null) {
@@ -86,7 +94,7 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
                 .getServiceReferences(CloudServiceFactory.class, null);
 
         for (ServiceReference<CloudServiceFactory> cloudServiceFactoryReference : cloudServiceFactoryReferences) {
-            if (!cloudServiceFactoryReference.getProperty("component.name").equals(factoryPid)) {
+            if (!cloudServiceFactoryReference.getProperty(COMPONENT_NAME).equals(factoryPid)) {
                 continue;
             }
             CloudServiceFactory cloudServiceFactory = ServiceLocator.getInstance().getService(cloudServiceFactoryReference);
@@ -154,6 +162,25 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
                 ServiceLocator.getInstance().ungetService(cloudServiceFactoryReference);
             }
         }
+    }
+
+    @Override
+    public String getSuggestedCloudServicePid(String factoryPid) throws GwtKuraException {
+        Collection<ServiceReference<CloudServiceFactory>> cloudServiceFactoryReferences = ServiceLocator.getInstance()
+                .getServiceReferences(CloudServiceFactory.class, null);
+
+        for (ServiceReference<CloudServiceFactory> cloudServiceFactoryReference : cloudServiceFactoryReferences) {
+            CloudServiceFactory cloudServiceFactory = ServiceLocator.getInstance().getService(cloudServiceFactoryReference);
+            if (!cloudServiceFactory.getFactoryPid().equals(factoryPid)) {
+                continue;
+            }
+            Object propertyObject = cloudServiceFactoryReference.getProperty(KURA_UI_CSF_PID_DEFAULT);
+            ServiceLocator.getInstance().ungetService(cloudServiceFactoryReference);
+            if (propertyObject != null) {
+                return (String) propertyObject;
+            }
+        }
+        return null;
     }
 
 }

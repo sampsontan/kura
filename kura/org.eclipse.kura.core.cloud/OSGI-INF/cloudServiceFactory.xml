@@ -9,4 +9,5 @@
    <property name="osgi.command.function" type="String">
       createConfiguration
    </property>
+   <property name="kura.ui.csf.pid.default" type="String" value="org.eclipse.kura.cloud.CloudService-2"/>
 </scr:component>
