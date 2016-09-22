@@ -149,7 +149,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
     }
 
     private void fillFromCloudService(List<GwtGroupedNVPair> pairs, ServiceReference<CloudService> cloudServiceReference, String cloudServicePid) throws GwtKuraException {
-        pairs.add(new GwtGroupedNVPair("cloudStatus", "Connection Name", stripPidPrefix(cloudServicePid)));
+        pairs.add(new GwtGroupedNVPair("cloudStatus", "Connection Name", cloudServicePid));
 
         final CloudService cloudService = ServiceLocator.getInstance().getService(cloudServiceReference);
         try {
@@ -286,20 +286,6 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         }
 
         return pairs;
-    }
-    
-    private String stripPidPrefix(String pid) {
-        int start = pid.lastIndexOf('.');
-        if (start < 0) {
-            return pid;
-        } else {
-            int begin = start + 1;
-            if (begin < pid.length()) {
-                return pid.substring(begin);
-            } else {
-                return pid;
-            }
-        }
     }
     
     private void sortCloudServiceServiceReferences(List<ServiceReference<CloudService>> configs) {
