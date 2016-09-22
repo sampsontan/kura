@@ -103,6 +103,8 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
         setDirty(false);
         applyConnectionEdit.setEnabled(false);
         resetConnectionEdit.setEnabled(false);
+        
+        initInvalidDataModal();
     }
 
     @Override
@@ -314,5 +316,10 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
         applyConnectionEdit.setEnabled(false);
         resetConnectionEdit.setEnabled(false);
         setDirty(false);
+    }
+    
+    private void initInvalidDataModal() {
+        incompleteFieldsModal.setTitle(MSGS.warning());
+        incompleteFieldsText.setText(MSGS.formWithErrorsOrIncomplete());
     }
 }

@@ -38,7 +38,7 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     private static final String KURA_SERVICE_PID = "kura.service.pid";
 
     private static final String KURA_UI_CSF_PID_DEFAULT = "kura.ui.csf.pid.default";
-
+    private static final String KURA_UI_CSF_PID_REGEX = "kura.ui.csf.pid.regex";
     /**
      *
      */
@@ -175,6 +175,25 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
                 continue;
             }
             Object propertyObject = cloudServiceFactoryReference.getProperty(KURA_UI_CSF_PID_DEFAULT);
+            ServiceLocator.getInstance().ungetService(cloudServiceFactoryReference);
+            if (propertyObject != null) {
+                return (String) propertyObject;
+            }
+        }
+        return null;
+    }
+    
+    @Override
+    public String getCloudServicePidRegex(String factoryPid) throws GwtKuraException {
+        Collection<ServiceReference<CloudServiceFactory>> cloudServiceFactoryReferences = ServiceLocator.getInstance()
+                .getServiceReferences(CloudServiceFactory.class, null);
+
+        for (ServiceReference<CloudServiceFactory> cloudServiceFactoryReference : cloudServiceFactoryReferences) {
+            CloudServiceFactory cloudServiceFactory = ServiceLocator.getInstance().getService(cloudServiceFactoryReference);
+            if (!cloudServiceFactory.getFactoryPid().equals(factoryPid)) {
+                continue;
+            }
+            Object propertyObject = cloudServiceFactoryReference.getProperty(KURA_UI_CSF_PID_REGEX);
             ServiceLocator.getInstance().ungetService(cloudServiceFactoryReference);
             if (propertyObject != null) {
                 return (String) propertyObject;

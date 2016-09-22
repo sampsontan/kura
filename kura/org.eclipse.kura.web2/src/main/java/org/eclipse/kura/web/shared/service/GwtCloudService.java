@@ -30,6 +30,8 @@ public interface GwtCloudService extends RemoteService {
 	public List<String> findStackPidsByFactory(String factoryPid, String cloudServicePid) throws GwtKuraException;
 	
 	public String getSuggestedCloudServicePid(String factoryPid) throws GwtKuraException;
+	
+	public String getCloudServicePidRegex(String factoryPid) throws GwtKuraException;
 
 	public void createCloudServiceFromFactory(GwtXSRFToken xsrfToken, String factoryPid, String cloudServicePid) throws GwtKuraException;
 

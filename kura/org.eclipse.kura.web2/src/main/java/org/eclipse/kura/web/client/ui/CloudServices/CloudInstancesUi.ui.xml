@@ -78,10 +78,10 @@
 						<b:FormGroup>
 							<b:FormLabel for="cloudServicePid" addStyleNames="col-md-4">Cloud
 								Service Pid</b:FormLabel>
-							<g:FlowPanel addStyleNames="col-md-8">
-								<b:TextBox ui:field="cloudServicePid" b:id="cloudServicePid"
+							<g:FlowPanel addStyleNames="col-md-8" ui:field="cloudServiceFlowPanel">
+								<!-- <b:TextBox ui:field="cloudServicePid" b:id="cloudServicePid"
 									placeholder="Please enter the new cloud service Pid"
-									allowBlank="false" autoComplete="false"></b:TextBox>
+									allowBlank="false" autoComplete="false"></b:TextBox> -->
 							</g:FlowPanel>
 						</b:FormGroup>
 					</b:Form>

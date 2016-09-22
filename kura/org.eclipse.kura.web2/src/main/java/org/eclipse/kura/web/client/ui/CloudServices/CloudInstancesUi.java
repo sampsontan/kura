@@ -33,19 +33,25 @@ import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.Well;
+import org.gwtbootstrap3.client.ui.form.validator.RegExValidator;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -63,6 +69,8 @@ public class CloudInstancesUi extends Composite {
     private final GwtStatusServiceAsync gwtStatusService = GWT.create(GwtStatusService.class);
 
     private final CloudServicesUi cloudServicesUi;
+    
+    private RegExValidator regexValidator;
 
     interface CloudConnectionsUiUiBinder extends UiBinder<Widget, CloudInstancesUi> {
     }
@@ -86,9 +94,11 @@ public class CloudInstancesUi extends Composite {
     @UiField
     ListBox cloudFactoriesPids;
     @UiField
-    TextBox cloudServicePid;
+    FlowPanel cloudServiceFlowPanel;
     @UiField
     CellTable<GwtCloudConnectionEntry> connectionsGrid = new CellTable<GwtCloudConnectionEntry>();
+    
+    TextBox cloudServicePid;
 
     public CloudInstancesUi(final CloudServicesUi cloudServicesUi) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -101,6 +111,7 @@ public class CloudInstancesUi extends Composite {
         statusConnect.setText(MSG.connectButton());
         statusDisconnect.setText(MSG.disconnectButton());
         connectionsGrid.setSelectionModel(selectionModel);
+        cloudServicePid = new TextBox();
 
         btnCreateComp.addClickHandler(new ClickHandler() {
 
@@ -126,12 +137,8 @@ public class CloudInstancesUi extends Composite {
             public void onChange(ChangeEvent event) {
                 final String factoryPid = cloudFactoriesPids.getSelectedValue();
                 getSuggestedCloudServicePid(factoryPid);
-
             }
         });
-
-        cloudServicePid.setValidateOnBlur(true);
-        cloudServicePid.setAllowBlank(false);
 
         initConnectionButtons();
 
@@ -318,6 +325,7 @@ public class CloudInstancesUi extends Composite {
 
     private void showNewConnectionModal() {
         EntryClassUi.showWaitModal();
+        //cloudServicePid = new TextBox();
         cloudServicePid.clear();
         cloudFactoriesPids.clear();
 
@@ -478,9 +486,50 @@ public class CloudInstancesUi extends Composite {
 
             @Override
             public void onSuccess(String result) {
+                cloudServiceFlowPanel.clear();
+                
+                cloudServicePid = new TextBox();
+                cloudServicePid.setAutoComplete(false);
                 if (result != null) {
                     cloudServicePid.setPlaceholder(MSG.exampleGiven() + " " + result);
                 }
+                getCloudServicePidRegex(factoryPid);
+                
+                cloudServiceFlowPanel.add(cloudServicePid);
+            }
+        });
+    }
+    
+    private void getCloudServicePidRegex(final String factoryPid) {
+        gwtCloudService.getCloudServicePidRegex(factoryPid, new AsyncCallback<String>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                FailureHandler.handle(caught, gwtCloudService.getClass().getSimpleName());
+            }
+
+            @Override
+            public void onSuccess(String result) {
+                if (result != null) {
+                    regexValidator = new RegExValidator(result);
+                } else {
+                    regexValidator = new RegExValidator(".+");
+                }
+                cloudServicePid.addValidator(regexValidator);
+                cloudServicePid.addKeyUpHandler(new KeyUpHandler() {
+                    
+                    @Override
+                    public void onKeyUp(KeyUpEvent event) {
+                        cloudServicePid.validate();
+                    }
+                });
+                cloudServicePid.addBlurHandler(new BlurHandler() {
+                    
+                    @Override
+                    public void onBlur(BlurEvent event) {
+                        cloudServicePid.validate();
+                    }
+                });
             }
         });
     }
