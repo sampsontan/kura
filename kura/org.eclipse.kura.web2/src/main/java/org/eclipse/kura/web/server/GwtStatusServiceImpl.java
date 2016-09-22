@@ -16,6 +16,7 @@ package org.eclipse.kura.web.server;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.kura.KuraConnectException;
@@ -44,6 +45,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements GwtStatusService {
+    private static final String KURA_SERVICE_PID = "kura.service.pid";
+
     private static final long serialVersionUID = 8256280782910423734L;
 
     private static final String DATA_SERVICE_REFERENCE_NAME = "DataService";
@@ -69,7 +72,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         Collection<ServiceReference<CloudService>> cloudServiceReferences = ServiceLocator.getInstance().getServiceReferences(CloudService.class, null);
         
         for (ServiceReference<CloudService> cloudServiceReference : cloudServiceReferences) {
-            String cloudServicePid = (String) cloudServiceReference.getProperty("kura.service.pid");
+            String cloudServicePid = (String) cloudServiceReference.getProperty(KURA_SERVICE_PID);
             if (cloudServicePid.endsWith(connectionId)) {
             	String dataServiceRef = (String) cloudServiceReference.getProperty(DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX);
             	Collection<ServiceReference<DataService>> dataServiceReferences = ServiceLocator.getInstance().getServiceReferences(DataService.class, dataServiceRef);
@@ -108,7 +111,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         Collection<ServiceReference<CloudService>> cloudServiceReferences = ServiceLocator.getInstance().getServiceReferences(CloudService.class, null);
         
         for (ServiceReference<CloudService> cloudServiceReference : cloudServiceReferences) {
-            String cloudServicePid = (String) cloudServiceReference.getProperty("kura.service.pid");
+            String cloudServicePid = (String) cloudServiceReference.getProperty(KURA_SERVICE_PID);
             if (cloudServicePid.endsWith(connectionId)) {
             	String dataServiceRef = (String) cloudServiceReference.getProperty(DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX);
             	Collection<ServiceReference<DataService>> dataServiceReferences = ServiceLocator.getInstance().getServiceReferences(DataService.class, dataServiceRef);
@@ -129,37 +132,17 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         final List<GwtGroupedNVPair> pairs = new ArrayList<GwtGroupedNVPair>();
 
         try {
-            // FIXME: should be provided in stable order
-            
             final Collection<ServiceReference<CloudService>> cloudServiceReferences = ServiceLocator.getInstance().getServiceReferences(CloudService.class, null);
-            for (ServiceReference<CloudService> cloudServiceReference : cloudServiceReferences) {
-                String cloudServicePid= (String) cloudServiceReference.getProperty("kura.service.pid");
-                pairs.add(new GwtGroupedNVPair("cloudStatus", "Connection Name", cloudServicePid));
-
-                String dataServiceRef= (String) cloudServiceReference.getProperty(DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX);
-                Collection<ServiceReference<DataService>> dataServiceReferences= ServiceLocator.getInstance().getServiceReferences(DataService.class, dataServiceRef);
-
-                for (ServiceReference<DataService> dataServiceReference : dataServiceReferences) {
-                    DataService dataService= ServiceLocator.getInstance().getService(dataServiceReference);
-                    if (dataService != null) {
-                        pairs.add(new GwtGroupedNVPair("cloudStatus", "Connection Status", dataService.isConnected() ? "CONNECTED" : "DISCONNECTED"));
-                        pairs.add(new GwtGroupedNVPair("cloudStatus", "Auto-connect", dataService.isAutoConnectEnabled() ? "ON (Retry Interval is " + Integer.toString(dataService.getRetryInterval()) + "s)": "OFF"));
-                    }
-
-                    String dataTransportRef= (String) dataServiceReference.getProperty(DATA_TRANSPORT_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX);
-                    List<DataTransportService> dataTransportServices = ServiceLocator.getInstance().getServices(DataTransportService.class, dataTransportRef);
-                    for (DataTransportService dataTransportService : dataTransportServices) {
-                        pairs.add(new GwtGroupedNVPair("cloudStatus", "Broker URL", dataTransportService.getBrokerUrl()));
-                        pairs.add(new GwtGroupedNVPair("cloudStatus", "Account", dataTransportService.getAccountName()));
-                        pairs.add(new GwtGroupedNVPair("cloudStatus", "Username", dataTransportService.getUsername()));
-                        pairs.add(new GwtGroupedNVPair("cloudStatus", "Client ID", dataTransportService.getClientId()));
-                    }
-                    ServiceLocator.getInstance().ungetService(dataServiceReference);
+            List<ServiceReference<CloudService>> cloudServiceReferencesList = new ArrayList<ServiceReference<CloudService>> (cloudServiceReferences);
+            sortCloudServiceServiceReferences(cloudServiceReferencesList);
+            for (ServiceReference<CloudService> cloudServiceReference : cloudServiceReferencesList) {
+                String cloudServicePid= (String) cloudServiceReference.getProperty(KURA_SERVICE_PID);
+                if (cloudServicePid != null) {
+                    fillFromCloudService(pairs, cloudServiceReference, cloudServicePid);
                 }
             }
         } catch (GwtKuraException e) {
             s_logger.warn("Get cloud status failed", e);
-            //removed the rethrow: the interface will continue to work even if there are no cloud stacks defined.
         }
 
         return pairs;
@@ -317,5 +300,22 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 return pid;
             }
         }
+    }
+    
+    private void sortCloudServiceServiceReferences(List<ServiceReference<CloudService>> configs) {
+        Collections.sort(configs, new Comparator<ServiceReference<CloudService>>() {
+
+            @Override
+            public int compare(ServiceReference<CloudService> arg0, ServiceReference<CloudService> arg1) {
+                Object object0 = arg0.getProperty(KURA_SERVICE_PID);
+                Object object1 = arg1.getProperty(KURA_SERVICE_PID);
+                if (object0 != null && object1 != null) {
+                    String name0 = (String) object0;
+                    String name1 = (String) object1;
+                    return name0.compareTo(name1);
+                }
+                return 0;
+            }
+        });
     }
 }
