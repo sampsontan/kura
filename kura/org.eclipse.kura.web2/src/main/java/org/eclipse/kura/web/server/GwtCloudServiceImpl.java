@@ -18,6 +18,7 @@ import java.util.List;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.factory.CloudServiceFactory;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -26,26 +27,16 @@ import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtCloudService;
 import org.osgi.framework.ServiceReference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements GwtCloudService {
 
-    private static final String COMPONENT_NAME = "component.name";
-
-    private static final String SERVICE_FACTORY_PID = "service.factoryPid";
-
-    private static final String KURA_SERVICE_PID = "kura.service.pid";
-
-    private static final String KURA_UI_CSF_PID_DEFAULT = "kura.ui.csf.pid.default";
-    private static final String KURA_UI_CSF_PID_REGEX = "kura.ui.csf.pid.regex";
-    /**
-     *
-     */
     private static final long serialVersionUID = 2595835826149606703L;
 
-    private static final Logger s_logger = LoggerFactory.getLogger(GwtCloudServiceImpl.class);
-
+    private static final String COMPONENT_NAME = "component.name";
+    private static final String SERVICE_FACTORY_PID = "service.factoryPid";
+    private static final String KURA_SERVICE_PID = ConfigurationService.KURA_SERVICE_PID;
+    private static final String KURA_UI_CSF_PID_DEFAULT = "kura.ui.csf.pid.default";
+    private static final String KURA_UI_CSF_PID_REGEX = "kura.ui.csf.pid.regex";
     private static final String KURA_CLOUD_SERVICE_FACTORY_PID = "kura.cloud.service.factory.pid";
 
     @Override
@@ -97,7 +88,8 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
             if (!cloudServiceFactoryReference.getProperty(COMPONENT_NAME).equals(factoryPid)) {
                 continue;
             }
-            CloudServiceFactory cloudServiceFactory = ServiceLocator.getInstance().getService(cloudServiceFactoryReference);
+            CloudServiceFactory cloudServiceFactory = ServiceLocator.getInstance()
+                    .getService(cloudServiceFactoryReference);
             try {
                 componentPids.addAll(cloudServiceFactory.getStackComponentsPids(cloudServicePid));
             } catch (KuraException e) {
@@ -170,7 +162,8 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
                 .getServiceReferences(CloudServiceFactory.class, null);
 
         for (ServiceReference<CloudServiceFactory> cloudServiceFactoryReference : cloudServiceFactoryReferences) {
-            CloudServiceFactory cloudServiceFactory = ServiceLocator.getInstance().getService(cloudServiceFactoryReference);
+            CloudServiceFactory cloudServiceFactory = ServiceLocator.getInstance()
+                    .getService(cloudServiceFactoryReference);
             if (!cloudServiceFactory.getFactoryPid().equals(factoryPid)) {
                 continue;
             }
@@ -182,14 +175,15 @@ public class GwtCloudServiceImpl extends OsgiRemoteServiceServlet implements Gwt
         }
         return null;
     }
-    
+
     @Override
     public String getCloudServicePidRegex(String factoryPid) throws GwtKuraException {
         Collection<ServiceReference<CloudServiceFactory>> cloudServiceFactoryReferences = ServiceLocator.getInstance()
                 .getServiceReferences(CloudServiceFactory.class, null);
 
         for (ServiceReference<CloudServiceFactory> cloudServiceFactoryReference : cloudServiceFactoryReferences) {
-            CloudServiceFactory cloudServiceFactory = ServiceLocator.getInstance().getService(cloudServiceFactoryReference);
+            CloudServiceFactory cloudServiceFactory = ServiceLocator.getInstance()
+                    .getService(cloudServiceFactoryReference);
             if (!cloudServiceFactory.getFactoryPid().equals(factoryPid)) {
                 continue;
             }

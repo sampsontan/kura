@@ -41,20 +41,20 @@ import org.osgi.framework.ServiceReference;
 
 public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements GwtComponentService {
 
-    private static final String KURA_SERVICE_PID = "kura.service.pid";
+    private static final String KURA_SERVICE_PID = ConfigurationService.KURA_SERVICE_PID;
     private static final String SERVICE_FACTORY_PID = "service.factoryPid";
     private static final String KURA_UI_SERVICE_HIDE = "kura.ui.service.hide";
-    
+
     private static final long serialVersionUID = -4176701819112753800L;
 
     @Override
     public List<GwtConfigComponent> findServicesConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         List<String> hidePidsList = new ArrayList<String>();
-        
-        //identify the services to hide by component configuration property
+
+        // identify the services to hide by component configuration property
         fillServicesToHideList(hidePidsList);
-        
+
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         List<GwtConfigComponent> gwtConfigs = new ArrayList<GwtConfigComponent>();
         try {
@@ -66,15 +66,14 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             for (ComponentConfiguration config : configs) {
 
                 // ignore items we want to hide
-                if (hidePidsList.contains(config.getPid()) ||
-                        config.getPid().endsWith("SystemPropertiesService") ||
-                        config.getPid().endsWith("NetworkAdminService") ||
-                        config.getPid().endsWith("NetworkConfigurationService") ||
-                        config.getPid().endsWith("SslManagerService") ||
-                        config.getPid().endsWith("FirewallConfigurationService")) {
+                if (hidePidsList.contains(config.getPid()) || config.getPid().endsWith("SystemPropertiesService")
+                        || config.getPid().endsWith("NetworkAdminService")
+                        || config.getPid().endsWith("NetworkConfigurationService")
+                        || config.getPid().endsWith("SslManagerService")
+                        || config.getPid().endsWith("FirewallConfigurationService")) {
                     continue;
                 }
-                
+
                 convertComponentConfigurationByOcd(gwtConfigs, config);
             }
         } catch (Throwable t) {
@@ -325,8 +324,9 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             KuraExceptionHandler.handle(t);
         }
     }
-    
-    private void convertComponentConfigurationByOcd(List<GwtConfigComponent> gwtConfigs, ComponentConfiguration config) {
+
+    private void convertComponentConfigurationByOcd(List<GwtConfigComponent> gwtConfigs,
+            ComponentConfiguration config) {
         OCD ocd = config.getDefinition();
         if (ocd != null) {
 
@@ -431,7 +431,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             }
         });
     }
-    
+
     private Object getObjectValue(GwtConfigParameter gwtConfigParam, String strValue) {
         Object objValue = null;
         GwtConfigParameterType gwtType = gwtConfigParam.getType();
@@ -574,10 +574,11 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             }
         }
     }
-    
+
     private void fillServicesToHideList(List<String> hidePidsList) throws GwtKuraException {
-        Collection<ServiceReference<ConfigurableComponent>> configurableComponentReferences = ServiceLocator.getInstance().getServiceReferences(ConfigurableComponent.class, null);
-        
+        Collection<ServiceReference<ConfigurableComponent>> configurableComponentReferences = ServiceLocator
+                .getInstance().getServiceReferences(ConfigurableComponent.class, null);
+
         for (ServiceReference<ConfigurableComponent> configurableComponentReference : configurableComponentReferences) {
             Object propertyObject = configurableComponentReference.getProperty(KURA_SERVICE_PID);
             if (configurableComponentReference.getProperty(KURA_UI_SERVICE_HIDE) != null && propertyObject != null) {
@@ -586,9 +587,10 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             }
             ServiceLocator.getInstance().ungetService(configurableComponentReference);
         }
-        
-        Collection<ServiceReference<SelfConfiguringComponent>> selfConfiguringComponentReferences = ServiceLocator.getInstance().getServiceReferences(SelfConfiguringComponent.class, null);
-        
+
+        Collection<ServiceReference<SelfConfiguringComponent>> selfConfiguringComponentReferences = ServiceLocator
+                .getInstance().getServiceReferences(SelfConfiguringComponent.class, null);
+
         for (ServiceReference<SelfConfiguringComponent> selfConfiguringComponentReference : selfConfiguringComponentReferences) {
             Object propertyObject = selfConfiguringComponentReference.getProperty(KURA_SERVICE_PID);
             if (selfConfiguringComponentReference.getProperty(KURA_UI_SERVICE_HIDE) != null && propertyObject != null) {

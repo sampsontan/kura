@@ -23,18 +23,21 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("cloudservices")
 public interface GwtCloudService extends RemoteService {
-	public List<GwtCloudConnectionEntry> findCloudServices() throws GwtKuraException;
-	
-	public List<GwtGroupedNVPair> findCloudServiceFactories() throws GwtKuraException;
-	
-	public List<String> findStackPidsByFactory(String factoryPid, String cloudServicePid) throws GwtKuraException;
-	
-	public String getSuggestedCloudServicePid(String factoryPid) throws GwtKuraException;
-	
-	public String getCloudServicePidRegex(String factoryPid) throws GwtKuraException;
 
-	public void createCloudServiceFromFactory(GwtXSRFToken xsrfToken, String factoryPid, String cloudServicePid) throws GwtKuraException;
+    public List<GwtCloudConnectionEntry> findCloudServices() throws GwtKuraException;
 
-	public void deleteCloudServiceFromFactory(GwtXSRFToken xsrfToken, String factoryPid, String cloudServicePid) throws GwtKuraException;
+    public List<GwtGroupedNVPair> findCloudServiceFactories() throws GwtKuraException;
+
+    public List<String> findStackPidsByFactory(String factoryPid, String cloudServicePid) throws GwtKuraException;
+
+    public String getSuggestedCloudServicePid(String factoryPid) throws GwtKuraException;
+
+    public String getCloudServicePidRegex(String factoryPid) throws GwtKuraException;
+
+    public void createCloudServiceFromFactory(GwtXSRFToken xsrfToken, String factoryPid, String cloudServicePid)
+            throws GwtKuraException;
+
+    public void deleteCloudServiceFromFactory(GwtXSRFToken xsrfToken, String factoryPid, String cloudServicePid)
+            throws GwtKuraException;
 
 }

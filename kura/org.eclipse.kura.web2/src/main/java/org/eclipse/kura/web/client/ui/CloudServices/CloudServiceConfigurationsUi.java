@@ -42,23 +42,23 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
 public class CloudServiceConfigurationsUi extends Composite {
+
     private static final Logger logger = Logger.getLogger(CloudServiceConfigurationsUi.class.getSimpleName());
     private static final String KURA_CLOUD_SERVICE_FACTORY_PID = "kura.cloud.service.factory.pid";
 
-    
-    private static CloudServiceConfigurationsUiUiBinder uiBinder = GWT.create(CloudServiceConfigurationsUiUiBinder.class);
+    private static CloudServiceConfigurationsUiUiBinder uiBinder = GWT
+            .create(CloudServiceConfigurationsUiUiBinder.class);
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtCloudServiceAsync gwtCloudService = GWT.create(GwtCloudService.class);
     private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
 
-
     private TabListItem currentlySelectedTab;
-    
+
     interface CloudServiceConfigurationsUiUiBinder extends UiBinder<Widget, CloudServiceConfigurationsUi> {
     }
 
     private boolean dirty;
-    private CloudServicesUi cloudServicesUi;
+    private final CloudServicesUi cloudServicesUi;
 
     @UiField
     TabContent connectionTabContent;
@@ -72,8 +72,9 @@ public class CloudServiceConfigurationsUi extends Composite {
 
     public void setDirty(boolean dirty) {
         this.dirty = dirty;
-        for (int connectionTabIndex = 0; connectionTabIndex < connectionTabContent.getWidgetCount(); connectionTabIndex++) {
-            TabPane pane = (TabPane) connectionTabContent.getWidget(connectionTabIndex);
+        for (int connectionTabIndex = 0; connectionTabIndex < this.connectionTabContent
+                .getWidgetCount(); connectionTabIndex++) {
+            TabPane pane = (TabPane) this.connectionTabContent.getWidget(connectionTabIndex);
             for (int paneIndex = 0; paneIndex < pane.getWidgetCount(); paneIndex++) {
                 CloudServiceConfigurationUi serviceConfigUi = (CloudServiceConfigurationUi) pane.getWidget(paneIndex);
                 serviceConfigUi.setDirty(dirty);
@@ -82,19 +83,21 @@ public class CloudServiceConfigurationsUi extends Composite {
     }
 
     public boolean isDirty() {
-        for (int connectionTabIndex = 0; connectionTabIndex < connectionTabContent.getWidgetCount(); connectionTabIndex++) {
-            TabPane pane = (TabPane) connectionTabContent.getWidget(connectionTabIndex);
+        for (int connectionTabIndex = 0; connectionTabIndex < this.connectionTabContent
+                .getWidgetCount(); connectionTabIndex++) {
+            TabPane pane = (TabPane) this.connectionTabContent.getWidget(connectionTabIndex);
             for (int paneIndex = 0; paneIndex < pane.getWidgetCount(); paneIndex++) {
                 CloudServiceConfigurationUi serviceConfigUi = (CloudServiceConfigurationUi) pane.getWidget(paneIndex);
-                dirty = dirty || serviceConfigUi.isDirty();
+                this.dirty = this.dirty || serviceConfigUi.isDirty();
             }
         }
-        return dirty;
+        return this.dirty;
     }
-    
+
     public CloudServiceConfigurationUi getDirtyCloudConfiguration() {
-        for (int connectionTabIndex = 0; connectionTabIndex < connectionTabContent.getWidgetCount(); connectionTabIndex++) {
-            TabPane pane = (TabPane) connectionTabContent.getWidget(connectionTabIndex);
+        for (int connectionTabIndex = 0; connectionTabIndex < this.connectionTabContent
+                .getWidgetCount(); connectionTabIndex++) {
+            TabPane pane = (TabPane) this.connectionTabContent.getWidget(connectionTabIndex);
             for (int paneIndex = 0; paneIndex < pane.getWidgetCount(); paneIndex++) {
                 CloudServiceConfigurationUi serviceConfigUi = (CloudServiceConfigurationUi) pane.getWidget(paneIndex);
                 if (serviceConfigUi.isDirty()) {
@@ -106,17 +109,17 @@ public class CloudServiceConfigurationsUi extends Composite {
     }
 
     public void setVisibility(boolean isVisible) {
-        connectionNavtabs.setVisible(isVisible);
-        connectionTabContent.setVisible(isVisible);
+        this.connectionNavtabs.setVisible(isVisible);
+        this.connectionTabContent.setVisible(isVisible);
     }
-    
+
     public void selectConnection(GwtCloudConnectionEntry selection) {
-        connectionNavtabs.clear();
-        connectionTabContent.clear();
+        this.connectionNavtabs.clear();
+        this.connectionTabContent.clear();
 
         final String selectedCloudServicePid = selection.getCloudServicePid();
 
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
             public void onFailure(Throwable ex) {
@@ -125,7 +128,8 @@ public class CloudServiceConfigurationsUi extends Composite {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                gwtComponentService.findComponentConfiguration(token, selectedCloudServicePid, new AsyncCallback<List<GwtConfigComponent>>() {
+                CloudServiceConfigurationsUi.this.gwtComponentService.findComponentConfiguration(token,
+                        selectedCloudServicePid, new AsyncCallback<List<GwtConfigComponent>>() {
 
                     @Override
                     public void onFailure(Throwable ex) {
@@ -136,7 +140,8 @@ public class CloudServiceConfigurationsUi extends Composite {
                     @Override
                     public void onSuccess(List<GwtConfigComponent> result) {
                         for (GwtConfigComponent pair : result) {
-                            if (selectedCloudServicePid.equals(pair.getComponentId()) && pair.getParameter(KURA_CLOUD_SERVICE_FACTORY_PID) != null) {
+                            if (selectedCloudServicePid.equals(pair.getComponentId())
+                                    && pair.getParameter(KURA_CLOUD_SERVICE_FACTORY_PID) != null) {
                                 String factoryPid = pair.getParameter(KURA_CLOUD_SERVICE_FACTORY_PID).getValue();
                                 getCloudStackConfigurations(factoryPid, selectedCloudServicePid);
                             }
@@ -148,15 +153,15 @@ public class CloudServiceConfigurationsUi extends Composite {
     }
 
     public TabListItem getSelectedTab() {
-        return currentlySelectedTab;
+        return this.currentlySelectedTab;
     }
-    
+
     public void setSelectedTab(TabListItem tabListItem) {
         this.currentlySelectedTab = tabListItem;
     }
-    
+
     private void getCloudStackConfigurations(String factoryPid, String cloudServicePid) {
-        gwtCloudService.findStackPidsByFactory(factoryPid, cloudServicePid, new AsyncCallback<List<String>>() {
+        this.gwtCloudService.findStackPidsByFactory(factoryPid, cloudServicePid, new AsyncCallback<List<String>>() {
 
             @Override
             public void onFailure(Throwable ex) {
@@ -168,7 +173,8 @@ public class CloudServiceConfigurationsUi extends Composite {
             public void onSuccess(List<String> result) {
                 final List<String> pidsResult = result;
 
-                gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+                CloudServiceConfigurationsUi.this.gwtXSRFService
+                        .generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                     @Override
                     public void onFailure(Throwable ex) {
@@ -177,7 +183,8 @@ public class CloudServiceConfigurationsUi extends Composite {
 
                     @Override
                     public void onSuccess(GwtXSRFToken token) {
-                        gwtComponentService.findFilteredComponentConfigurations(token, new AsyncCallback<List<GwtConfigComponent>>() {
+                        CloudServiceConfigurationsUi.this.gwtComponentService.findFilteredComponentConfigurations(token,
+                                new AsyncCallback<List<GwtConfigComponent>>() {
 
                             @Override
                             public void onFailure(Throwable ex) {
@@ -216,23 +223,24 @@ public class CloudServiceConfigurationsUi extends Composite {
         TabListItem item = new TabListItem(simplifiedComponentName);
         item.setDataTarget("#" + simplifiedComponentName);
         item.addClickHandler(new ClickHandler() {
-            
+
             @Override
             public void onClick(ClickEvent event) {
-                Anchor anchor = (Anchor)event.getSource();
-                cloudServicesUi.onTabSelectionChange((TabListItem)anchor.getParent());
+                Anchor anchor = (Anchor) event.getSource();
+                CloudServiceConfigurationsUi.this.cloudServicesUi
+                        .onTabSelectionChange((TabListItem) anchor.getParent());
             }
         });
-        connectionNavtabs.add(item);
+        this.connectionNavtabs.add(item);
 
         TabPane tabPane = new TabPane();
         tabPane.setId(simplifiedComponentName);
         CloudServiceConfigurationUi serviceConfigurationBinder = new CloudServiceConfigurationUi(config);
         tabPane.add(serviceConfigurationBinder);
-        connectionTabContent.add(tabPane);
+        this.connectionTabContent.add(tabPane);
 
         if (isFirstEntry) {
-            currentlySelectedTab = item;
+            this.currentlySelectedTab = item;
             item.setActive(true);
             tabPane.setActive(true);
         }

@@ -63,10 +63,10 @@ public class CloudServicesUi extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
 
         cloudInstancesBinder = new CloudInstancesUi(this);
-        cloudInstancesPanel.add(cloudInstancesBinder);
+        this.cloudInstancesPanel.add(cloudInstancesBinder);
 
         cloudServiceConfigurationsBinder = new CloudServiceConfigurationsUi(this);
-        cloudConfigurationsPanel.add(cloudServiceConfigurationsBinder);
+        this.cloudConfigurationsPanel.add(cloudServiceConfigurationsBinder);
     }
 
     public void refresh() {
@@ -76,8 +76,8 @@ public class CloudServicesUi extends Composite {
 
     protected void refreshInternal() {
         cloudInstancesBinder.refresh();
-        currentlySelectedEntry = cloudInstancesBinder.getSelectedObject();
-        currentlySelectedTab = cloudServiceConfigurationsBinder.getSelectedTab();
+        this.currentlySelectedEntry = cloudInstancesBinder.getSelectedObject();
+        this.currentlySelectedTab = cloudServiceConfigurationsBinder.getSelectedTab();
         setVisibility();
     }
 
@@ -96,14 +96,14 @@ public class CloudServicesUi extends Composite {
         if (cloudInstancesBinder.getTableSize() == 0) {
             cloudInstancesBinder.setVisibility(false);
             cloudServiceConfigurationsBinder.setVisibility(false);
-            cloudConfigurationsPanel.setVisible(false);
-            notification.setVisible(true);
-            notification.setText(MSG.noConnectionsAvailable());
+            this.cloudConfigurationsPanel.setVisible(false);
+            this.notification.setVisible(true);
+            this.notification.setText(MSG.noConnectionsAvailable());
         } else {
             cloudInstancesBinder.setVisibility(true);
             cloudServiceConfigurationsBinder.setVisibility(true);
-            cloudConfigurationsPanel.setVisible(true);
-            notification.setVisible(false);
+            this.cloudConfigurationsPanel.setVisible(true);
+            this.notification.setVisible(false);
         }
     }
 
@@ -112,23 +112,23 @@ public class CloudServicesUi extends Composite {
 
         if (!isDirty()) {
             if (selectedInstanceEntry != null) {
-                currentlySelectedEntry = selectedInstanceEntry;
+                this.currentlySelectedEntry = selectedInstanceEntry;
                 cloudServiceConfigurationsBinder.selectConnection(selectedInstanceEntry);
             }
         } else {
-            if (selectedInstanceEntry != currentlySelectedEntry) {
+            if (selectedInstanceEntry != this.currentlySelectedEntry) {
                 showDirtyModal();
             }
         }
     }
 
     protected void onTabSelectionChange(TabListItem newTab) {
-        currentlySelectedTab = cloudServiceConfigurationsBinder.getSelectedTab();
-        if (isDirty() && newTab != currentlySelectedTab) {
+        this.currentlySelectedTab = cloudServiceConfigurationsBinder.getSelectedTab();
+        if (isDirty() && newTab != this.currentlySelectedTab) {
             showDirtyModal();
         } else {
-            currentlySelectedTab = newTab;
-            cloudServiceConfigurationsBinder.setSelectedTab(currentlySelectedTab);
+            this.currentlySelectedTab = newTab;
+            cloudServiceConfigurationsBinder.setSelectedTab(this.currentlySelectedTab);
         }
     }
 
@@ -154,7 +154,7 @@ public class CloudServicesUi extends Composite {
                 modal.hide();
                 GwtCloudConnectionEntry selectedInstanceEntry = cloudInstancesBinder.getSelectedObject();
                 if (selectedInstanceEntry != null) {
-                    currentlySelectedEntry = selectedInstanceEntry;
+                    CloudServicesUi.this.currentlySelectedEntry = selectedInstanceEntry;
                     cloudServiceConfigurationsBinder.selectConnection(selectedInstanceEntry);
                 }
 
@@ -162,7 +162,7 @@ public class CloudServicesUi extends Composite {
                 if (dirtyConfig != null) {
                     dirtyConfig.resetVisualization();
                 }
-                
+
                 setDirty(false);
             }
         });
@@ -173,8 +173,8 @@ public class CloudServicesUi extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                cloudInstancesBinder.setSelected(currentlySelectedEntry);
-                currentlySelectedTab.showTab();
+                cloudInstancesBinder.setSelected(CloudServicesUi.this.currentlySelectedEntry);
+                CloudServicesUi.this.currentlySelectedTab.showTab();
                 modal.hide();
             }
         });

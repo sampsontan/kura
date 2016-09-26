@@ -58,7 +58,7 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
     }
 
     private Modal modal;
-    private GwtConfigComponent originalConfig;
+    private final GwtConfigComponent originalConfig;
 
     @UiField
     Button applyConnectionEdit;
@@ -77,13 +77,13 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
 
     public CloudServiceConfigurationUi(final GwtConfigComponent addedItem) {
         initWidget(uiBinder.createAndBindUi(this));
-        initialized = false;
-        originalConfig = addedItem;
-        restoreConfiguration(originalConfig);
-        connectionEditFields.clear();
+        this.initialized = false;
+        this.originalConfig = addedItem;
+        restoreConfiguration(this.originalConfig);
+        this.connectionEditFields.clear();
 
-        applyConnectionEdit.setText(MSGS.apply());
-        applyConnectionEdit.addClickHandler(new ClickHandler() {
+        this.applyConnectionEdit.setText(MSGS.apply());
+        this.applyConnectionEdit.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -91,8 +91,8 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
             }
         });
 
-        resetConnectionEdit.setText(MSGS.reset());
-        resetConnectionEdit.addClickHandler(new ClickHandler() {
+        this.resetConnectionEdit.setText(MSGS.reset());
+        this.resetConnectionEdit.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -101,24 +101,24 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
         });
 
         setDirty(false);
-        applyConnectionEdit.setEnabled(false);
-        resetConnectionEdit.setEnabled(false);
-        
+        this.applyConnectionEdit.setEnabled(false);
+        this.resetConnectionEdit.setEnabled(false);
+
         initInvalidDataModal();
     }
 
     @Override
     protected void setDirty(boolean flag) {
-        dirty = flag;
-        if (dirty && initialized) {
-            applyConnectionEdit.setEnabled(true);
-            resetConnectionEdit.setEnabled(true);
+        this.dirty = flag;
+        if (this.dirty && this.initialized) {
+            this.applyConnectionEdit.setEnabled(true);
+            this.resetConnectionEdit.setEnabled(true);
         }
     }
 
     @Override
     public boolean isDirty() {
-        return dirty;
+        return this.dirty;
     }
 
     @Override
@@ -126,13 +126,13 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
         if (isDirty()) {
             // Modal
             showDirtyModal();
-        }    // end is dirty
+        }       // end is dirty
     }
 
     @Override
     protected void renderForm() {
-        connectionEditFields.clear();
-        for (GwtConfigParameter param : m_configurableComponent.getParameters()) {
+        this.connectionEditFields.clear();
+        for (GwtConfigParameter param : this.m_configurableComponent.getParameters()) {
             if (param.getCardinality() == 0 || param.getCardinality() == 1 || param.getCardinality() == -1) {
                 FormGroup formGroup = new FormGroup();
                 renderConfigParameter(param, true, formGroup);
@@ -140,46 +140,46 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
                 renderMultiFieldConfigParameter(param);
             }
         }
-        initialized = true;
+        this.initialized = true;
     }
 
     @Override
     protected void renderTextField(final GwtConfigParameter param, boolean isFirstInstance, final FormGroup formGroup) {
         super.renderTextField(param, isFirstInstance, formGroup);
-        connectionEditFields.add(formGroup);
+        this.connectionEditFields.add(formGroup);
     }
 
     @Override
     protected void renderPasswordField(final GwtConfigParameter param, boolean isFirstInstance, FormGroup formGroup) {
         super.renderPasswordField(param, isFirstInstance, formGroup);
-        connectionEditFields.add(formGroup);
+        this.connectionEditFields.add(formGroup);
     }
 
     @Override
     protected void renderBooleanField(final GwtConfigParameter param, boolean isFirstInstance, FormGroup formGroup) {
         super.renderBooleanField(param, isFirstInstance, formGroup);
-        connectionEditFields.add(formGroup);
+        this.connectionEditFields.add(formGroup);
     }
 
     @Override
     protected void renderChoiceField(final GwtConfigParameter param, boolean isFirstInstance, FormGroup formGroup) {
         super.renderChoiceField(param, isFirstInstance, formGroup);
-        connectionEditFields.add(formGroup);
+        this.connectionEditFields.add(formGroup);
     }
 
     private void apply() {
         if (isValid()) {
             if (isDirty()) {
                 // TODO ask for confirmation first
-                modal = new Modal();
+                this.modal = new Modal();
 
                 ModalHeader header = new ModalHeader();
                 header.setTitle(MSGS.confirm());
-                modal.add(header);
+                this.modal.add(header);
 
                 ModalBody body = new ModalBody();
-                body.add(new Span(MSGS.deviceConfigConfirmation(m_configurableComponent.getComponentName())));
-                modal.add(body);
+                body.add(new Span(MSGS.deviceConfigConfirmation(this.m_configurableComponent.getComponentName())));
+                this.modal.add(body);
 
                 ModalFooter footer = new ModalFooter();
                 ButtonGroup group = new ButtonGroup();
@@ -197,7 +197,8 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
                             FailureHandler.handle(ex);
                             return;
                         }
-                        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+                        CloudServiceConfigurationUi.this.gwtXSRFService
+                                .generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                             @Override
                             public void onFailure(Throwable ex) {
@@ -207,7 +208,8 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
 
                             @Override
                             public void onSuccess(GwtXSRFToken token) {
-                                gwtComponentService.updateComponentConfiguration(token, m_configurableComponent,
+                                CloudServiceConfigurationUi.this.gwtComponentService.updateComponentConfiguration(token,
+                                        CloudServiceConfigurationUi.this.m_configurableComponent,
                                         new AsyncCallback<Void>() {
 
                                     @Override
@@ -222,10 +224,10 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
 
                                     @Override
                                     public void onSuccess(Void result) {
-                                        modal.hide();
+                                        CloudServiceConfigurationUi.this.modal.hide();
                                         logger.info(MSGS.info() + ": " + MSGS.deviceConfigApplied());
-                                        applyConnectionEdit.setEnabled(false);
-                                        resetConnectionEdit.setEnabled(false);
+                                        CloudServiceConfigurationUi.this.applyConnectionEdit.setEnabled(false);
+                                        CloudServiceConfigurationUi.this.resetConnectionEdit.setEnabled(false);
                                         setDirty(false);
                                         EntryClassUi.hideWaitModal();
                                     }
@@ -242,25 +244,25 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
 
                     @Override
                     public void onClick(ClickEvent event) {
-                        modal.hide();
+                        CloudServiceConfigurationUi.this.modal.hide();
                     }
                 });
                 group.add(no);
                 footer.add(group);
-                modal.add(footer);
-                modal.show();
+                this.modal.add(footer);
+                this.modal.show();
 
                 // ----
 
-            }                     // end isDirty()
+            }                        // end isDirty()
         } else {
             errorLogger.log(Level.SEVERE, "Device configuration error!");
-            incompleteFieldsModal.show();
-        }                     // end else isValid
+            this.incompleteFieldsModal.show();
+        }                        // end else isValid
     }
 
     private GwtConfigComponent getUpdatedConfiguration() {
-        Iterator<Widget> it = connectionEditFields.iterator();
+        Iterator<Widget> it = this.connectionEditFields.iterator();
         while (it.hasNext()) {
             Widget w = it.next();
             if (w instanceof FormGroup) {
@@ -268,19 +270,19 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
                 fillUpdatedConfiguration(fg);
             }
         }
-        return m_configurableComponent;
+        return this.m_configurableComponent;
     }
-    
+
     private void showDirtyModal() {
-        modal = new Modal();
+        this.modal = new Modal();
 
         ModalHeader header = new ModalHeader();
         header.setTitle(MSGS.confirm());
-        modal.add(header);
+        this.modal.add(header);
 
         ModalBody body = new ModalBody();
         body.add(new Span(MSGS.deviceConfigDirty()));
-        modal.add(body);
+        this.modal.add(body);
 
         ModalFooter footer = new ModalFooter();
         ButtonGroup group = new ButtonGroup();
@@ -290,7 +292,7 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
 
             @Override
             public void onClick(ClickEvent event) {
-                modal.hide();
+                CloudServiceConfigurationUi.this.modal.hide();
                 resetVisualization();
             }
         });
@@ -301,25 +303,25 @@ public class CloudServiceConfigurationUi extends AbstractServicesUi {
 
             @Override
             public void onClick(ClickEvent event) {
-                modal.hide();
+                CloudServiceConfigurationUi.this.modal.hide();
             }
         });
         group.add(no);
         footer.add(group);
-        modal.add(footer);
-        modal.show();
+        this.modal.add(footer);
+        this.modal.show();
     }
-    
+
     protected void resetVisualization() {
-        restoreConfiguration(originalConfig);
+        restoreConfiguration(this.originalConfig);
         renderForm();
-        applyConnectionEdit.setEnabled(false);
-        resetConnectionEdit.setEnabled(false);
+        this.applyConnectionEdit.setEnabled(false);
+        this.resetConnectionEdit.setEnabled(false);
         setDirty(false);
     }
-    
+
     private void initInvalidDataModal() {
-        incompleteFieldsModal.setTitle(MSGS.warning());
-        incompleteFieldsText.setText(MSGS.formWithErrorsOrIncomplete());
+        this.incompleteFieldsModal.setTitle(MSGS.warning());
+        this.incompleteFieldsText.setText(MSGS.formWithErrorsOrIncomplete());
     }
 }

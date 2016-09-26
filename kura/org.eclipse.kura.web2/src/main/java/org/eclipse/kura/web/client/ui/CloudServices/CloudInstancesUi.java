@@ -69,7 +69,7 @@ public class CloudInstancesUi extends Composite {
     private final GwtStatusServiceAsync gwtStatusService = GWT.create(GwtStatusService.class);
 
     private final CloudServicesUi cloudServicesUi;
-    
+
     private RegExValidator regexValidator;
 
     interface CloudConnectionsUiUiBinder extends UiBinder<Widget, CloudInstancesUi> {
@@ -97,7 +97,7 @@ public class CloudInstancesUi extends Composite {
     FlowPanel cloudServiceFlowPanel;
     @UiField
     CellTable<GwtCloudConnectionEntry> connectionsGrid = new CellTable<GwtCloudConnectionEntry>();
-    
+
     TextBox cloudServicePid;
 
     public CloudInstancesUi(final CloudServicesUi cloudServicesUi) {
@@ -105,25 +105,26 @@ public class CloudInstancesUi extends Composite {
         this.cloudServicesUi = cloudServicesUi;
 
         // Set text for buttons
-        connectionRefresh.setText(MSG.refresh());
-        newConnection.setText(MSG.newButton());
-        deleteConnection.setText(MSG.deleteButton());
-        statusConnect.setText(MSG.connectButton());
-        statusDisconnect.setText(MSG.disconnectButton());
-        connectionsGrid.setSelectionModel(selectionModel);
-        cloudServicePid = new TextBox();
+        this.connectionRefresh.setText(MSG.refresh());
+        this.newConnection.setText(MSG.newButton());
+        this.deleteConnection.setText(MSG.deleteButton());
+        this.statusConnect.setText(MSG.connectButton());
+        this.statusDisconnect.setText(MSG.disconnectButton());
+        this.connectionsGrid.setSelectionModel(this.selectionModel);
+        this.cloudServicePid = new TextBox();
 
-        btnCreateComp.addClickHandler(new ClickHandler() {
+        this.btnCreateComp.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                if (cloudServicePid.validate() && !cloudServicePid.getText().trim().isEmpty()) {
+                if (CloudInstancesUi.this.cloudServicePid.validate()
+                        && !CloudInstancesUi.this.cloudServicePid.getText().trim().isEmpty()) {
                     createComponent();
                 }
             }
         });
 
-        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        this.selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -131,11 +132,11 @@ public class CloudInstancesUi extends Composite {
             }
         });
 
-        cloudFactoriesPids.addChangeHandler(new ChangeHandler() {
+        this.cloudFactoriesPids.addChangeHandler(new ChangeHandler() {
 
             @Override
             public void onChange(ChangeEvent event) {
-                final String factoryPid = cloudFactoriesPids.getSelectedValue();
+                final String factoryPid = CloudInstancesUi.this.cloudFactoriesPids.getSelectedValue();
                 getSuggestedCloudServicePid(factoryPid);
             }
         });
@@ -146,51 +147,51 @@ public class CloudInstancesUi extends Composite {
     }
 
     public void loadData() {
-        cloudServicesDataProvider.getList().clear();
+        this.cloudServicesDataProvider.getList().clear();
 
-        gwtCloudService.findCloudServices(new AsyncCallback<List<GwtCloudConnectionEntry>>() {
+        this.gwtCloudService.findCloudServices(new AsyncCallback<List<GwtCloudConnectionEntry>>() {
 
             @Override
             public void onFailure(Throwable caught) {
-                FailureHandler.handle(caught, gwtCloudService.getClass().getSimpleName());
+                FailureHandler.handle(caught, CloudInstancesUi.this.gwtCloudService.getClass().getSimpleName());
             }
 
             @Override
             public void onSuccess(List<GwtCloudConnectionEntry> result) {
                 for (GwtCloudConnectionEntry pair : result) {
-                    cloudServicesDataProvider.getList().add(pair);
+                    CloudInstancesUi.this.cloudServicesDataProvider.getList().add(pair);
                 }
-                cloudServicesUi.refreshInternal();
+                CloudInstancesUi.this.cloudServicesUi.refreshInternal();
             }
         });
     }
 
     public int getTableSize() {
-        return cloudServicesDataProvider.getList().size();
+        return this.cloudServicesDataProvider.getList().size();
     }
 
     public void setVisibility(boolean isVisible) {
-        connectionsGrid.setVisible(isVisible);
+        this.connectionsGrid.setVisible(isVisible);
     }
 
     public GwtCloudConnectionEntry getSelectedObject() {
-        return selectionModel.getSelectedObject();
+        return this.selectionModel.getSelectedObject();
     }
 
     public void setSelected(GwtCloudConnectionEntry cloudEntry) {
-        selectionModel.setSelected(cloudEntry, true);
+        this.selectionModel.setSelected(cloudEntry, true);
     }
 
     private void initConnectionButtons() {
-        connectionRefresh.addClickHandler(new ClickHandler() {
+        this.connectionRefresh.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                cloudServicesUi.refresh();
+                CloudInstancesUi.this.cloudServicesUi.refresh();
             }
         });
 
-        newConnection.addClickHandler(new ClickHandler() {
+        this.newConnection.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -198,7 +199,7 @@ public class CloudInstancesUi extends Composite {
             }
         });
 
-        deleteConnection.addClickHandler(new ClickHandler() {
+        this.deleteConnection.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -208,21 +209,21 @@ public class CloudInstancesUi extends Composite {
             }
         });
 
-        statusConnect.addClickHandler(new ClickHandler() {
+        this.statusConnect.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                GwtCloudConnectionEntry selection = selectionModel.getSelectedObject();
+                GwtCloudConnectionEntry selection = CloudInstancesUi.this.selectionModel.getSelectedObject();
                 final String selectedCloudServicePid = selection.getCloudServicePid();
                 connectDataService(selectedCloudServicePid);
             }
         });
 
-        statusDisconnect.addClickHandler(new ClickHandler() {
+        this.statusDisconnect.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
-                GwtCloudConnectionEntry selection = selectionModel.getSelectedObject();
+                GwtCloudConnectionEntry selection = CloudInstancesUi.this.selectionModel.getSelectedObject();
                 final String selectedCloudServicePid = selection.getCloudServicePid();
                 disconnectDataService(selectedCloudServicePid);
             }
@@ -243,7 +244,7 @@ public class CloudInstancesUi extends Composite {
             }
         };
         col1.setCellStyleNames("status-table-row");
-        connectionsGrid.addColumn(col1, MSG.netIPv4Status());
+        this.connectionsGrid.addColumn(col1, MSG.netIPv4Status());
 
         TextColumn<GwtCloudConnectionEntry> col2 = new TextColumn<GwtCloudConnectionEntry>() {
 
@@ -257,7 +258,7 @@ public class CloudInstancesUi extends Composite {
             }
         };
         col2.setCellStyleNames("status-table-row");
-        connectionsGrid.addColumn(col2, MSG.connectionCloudFactoryLabel());
+        this.connectionsGrid.addColumn(col2, MSG.connectionCloudFactoryLabel());
 
         TextColumn<GwtCloudConnectionEntry> col3 = new TextColumn<GwtCloudConnectionEntry>() {
 
@@ -271,16 +272,16 @@ public class CloudInstancesUi extends Composite {
             }
         };
         col3.setCellStyleNames("status-table-row");
-        connectionsGrid.addColumn(col3, MSG.connectionCloudServiceLabel());
+        this.connectionsGrid.addColumn(col3, MSG.connectionCloudServiceLabel());
 
-        cloudServicesDataProvider.addDataDisplay(connectionsGrid);
+        this.cloudServicesDataProvider.addDataDisplay(this.connectionsGrid);
     }
 
     private void createComponent() {
-        final String factoryPid = cloudFactoriesPids.getSelectedValue();
-        final String newCloudServicePid = cloudServicePid.getValue();
+        final String factoryPid = this.cloudFactoriesPids.getSelectedValue();
+        final String newCloudServicePid = this.cloudServicePid.getValue();
 
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
             public void onFailure(Throwable ex) {
@@ -290,20 +291,21 @@ public class CloudInstancesUi extends Composite {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                gwtCloudService.createCloudServiceFromFactory(token, factoryPid, newCloudServicePid, new AsyncCallback<Void>() {
+                CloudInstancesUi.this.gwtCloudService.createCloudServiceFromFactory(token, factoryPid,
+                        newCloudServicePid, new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
                         EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(caught, gwtCloudService.getClass().getSimpleName());
-                        newConnectionModal.hide();
+                        FailureHandler.handle(caught, CloudInstancesUi.this.gwtCloudService.getClass().getSimpleName());
+                        CloudInstancesUi.this.newConnectionModal.hide();
                     }
 
                     @Override
                     public void onSuccess(Void result) {
-                        newConnectionModal.hide();
+                        CloudInstancesUi.this.newConnectionModal.hide();
                         EntryClassUi.hideWaitModal();
-                        cloudServicesUi.refresh(2000);
+                        CloudInstancesUi.this.cloudServicesUi.refresh(2000);
                     }
                 });
             }
@@ -312,49 +314,49 @@ public class CloudInstancesUi extends Composite {
     }
 
     public void refresh() {
-        int size = cloudServicesDataProvider.getList().size();
-        connectionsGrid.setVisibleRange(0, size);
-        cloudServicesDataProvider.flush();
+        int size = this.cloudServicesDataProvider.getList().size();
+        this.connectionsGrid.setVisibleRange(0, size);
+        this.cloudServicesDataProvider.flush();
 
         if (size > 0) {
-            GwtCloudConnectionEntry firstEntry = cloudServicesDataProvider.getList().get(0);
-            selectionModel.setSelected(firstEntry, true);
+            GwtCloudConnectionEntry firstEntry = this.cloudServicesDataProvider.getList().get(0);
+            this.selectionModel.setSelected(firstEntry, true);
         }
-        connectionsGrid.redraw();
+        this.connectionsGrid.redraw();
     }
 
     private void showNewConnectionModal() {
         EntryClassUi.showWaitModal();
-        //cloudServicePid = new TextBox();
-        cloudServicePid.clear();
-        cloudFactoriesPids.clear();
+        // cloudServicePid = new TextBox();
+        this.cloudServicePid.clear();
+        this.cloudFactoriesPids.clear();
 
-        gwtCloudService.findCloudServiceFactories(new AsyncCallback<List<GwtGroupedNVPair>>() {
+        this.gwtCloudService.findCloudServiceFactories(new AsyncCallback<List<GwtGroupedNVPair>>() {
 
             @Override
             public void onFailure(Throwable caught) {
                 EntryClassUi.hideWaitModal();
-                FailureHandler.handle(caught, gwtCloudService.getClass().getSimpleName());
-                newConnectionModal.hide();
+                FailureHandler.handle(caught, CloudInstancesUi.this.gwtCloudService.getClass().getSimpleName());
+                CloudInstancesUi.this.newConnectionModal.hide();
             }
 
             @Override
             public void onSuccess(List<GwtGroupedNVPair> result) {
                 for (GwtGroupedNVPair pair : result) {
-                    cloudFactoriesPids.addItem(pair.getValue());
+                    CloudInstancesUi.this.cloudFactoriesPids.addItem(pair.getValue());
                 }
-                String selectedFactoryPid = cloudFactoriesPids.getSelectedValue();
+                String selectedFactoryPid = CloudInstancesUi.this.cloudFactoriesPids.getSelectedValue();
                 getSuggestedCloudServicePid(selectedFactoryPid);
                 EntryClassUi.hideWaitModal();
             }
         });
 
-        newConnectionModal.show();
+        this.newConnectionModal.show();
     }
 
     private void connectDataService(final String connectionId) {
         EntryClassUi.showWaitModal();
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
             public void onFailure(Throwable ex) {
@@ -364,12 +366,13 @@ public class CloudInstancesUi extends Composite {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                gwtStatusService.connectDataService(token, connectionId, new AsyncCallback<Void>() {
+                CloudInstancesUi.this.gwtStatusService.connectDataService(token, connectionId,
+                        new AsyncCallback<Void>() {
 
                     @Override
                     public void onSuccess(Void result) {
                         EntryClassUi.hideWaitModal();
-                        cloudServicesUi.refresh(1000);
+                        CloudInstancesUi.this.cloudServicesUi.refresh(1000);
                     }
 
                     @Override
@@ -384,7 +387,7 @@ public class CloudInstancesUi extends Composite {
 
     private void disconnectDataService(final String connectionId) {
         EntryClassUi.showWaitModal();
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
             public void onFailure(Throwable ex) {
@@ -394,12 +397,13 @@ public class CloudInstancesUi extends Composite {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                gwtStatusService.disconnectDataService(token, connectionId, new AsyncCallback<Void>() {
+                CloudInstancesUi.this.gwtStatusService.disconnectDataService(token, connectionId,
+                        new AsyncCallback<Void>() {
 
                     @Override
                     public void onSuccess(Void result) {
                         EntryClassUi.hideWaitModal();
-                        cloudServicesUi.refresh(1000);
+                        CloudInstancesUi.this.cloudServicesUi.refresh(1000);
                     }
 
                     @Override
@@ -414,7 +418,7 @@ public class CloudInstancesUi extends Composite {
 
     private void deleteConnection(final String factoryPid, final String cloudServicePid) {
         EntryClassUi.showWaitModal();
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
             public void onFailure(Throwable ex) {
@@ -424,12 +428,13 @@ public class CloudInstancesUi extends Composite {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                gwtCloudService.deleteCloudServiceFromFactory(token, factoryPid, cloudServicePid, new AsyncCallback<Void>() {
+                CloudInstancesUi.this.gwtCloudService.deleteCloudServiceFromFactory(token, factoryPid, cloudServicePid,
+                        new AsyncCallback<Void>() {
 
                     @Override
                     public void onSuccess(Void result) {
                         EntryClassUi.hideWaitModal();
-                        cloudServicesUi.refresh(2000);
+                        CloudInstancesUi.this.cloudServicesUi.refresh(2000);
                     }
 
                     @Override
@@ -458,7 +463,7 @@ public class CloudInstancesUi extends Composite {
 
             @Override
             public void onClick(ClickEvent event) {
-                GwtCloudConnectionEntry selection = selectionModel.getSelectedObject();
+                GwtCloudConnectionEntry selection = CloudInstancesUi.this.selectionModel.getSelectedObject();
                 final String selectedFactoryPid = selection.getCloudFactoryPid();
                 final String selectedCloudServicePid = selection.getCloudServicePid();
                 deleteConnection(selectedFactoryPid, selectedCloudServicePid);
@@ -477,57 +482,57 @@ public class CloudInstancesUi extends Composite {
     }
 
     private void getSuggestedCloudServicePid(final String factoryPid) {
-        gwtCloudService.getSuggestedCloudServicePid(factoryPid, new AsyncCallback<String>() {
+        this.gwtCloudService.getSuggestedCloudServicePid(factoryPid, new AsyncCallback<String>() {
 
             @Override
             public void onFailure(Throwable caught) {
-                FailureHandler.handle(caught, gwtCloudService.getClass().getSimpleName());
+                FailureHandler.handle(caught, CloudInstancesUi.this.gwtCloudService.getClass().getSimpleName());
             }
 
             @Override
             public void onSuccess(String result) {
-                cloudServiceFlowPanel.clear();
-                
-                cloudServicePid = new TextBox();
-                cloudServicePid.setAutoComplete(false);
+                CloudInstancesUi.this.cloudServiceFlowPanel.clear();
+
+                CloudInstancesUi.this.cloudServicePid = new TextBox();
+                CloudInstancesUi.this.cloudServicePid.setAutoComplete(false);
                 if (result != null) {
-                    cloudServicePid.setPlaceholder(MSG.exampleGiven() + " " + result);
+                    CloudInstancesUi.this.cloudServicePid.setPlaceholder(MSG.exampleGiven() + " " + result);
                 }
                 getCloudServicePidRegex(factoryPid);
-                
-                cloudServiceFlowPanel.add(cloudServicePid);
+
+                CloudInstancesUi.this.cloudServiceFlowPanel.add(CloudInstancesUi.this.cloudServicePid);
             }
         });
     }
-    
+
     private void getCloudServicePidRegex(final String factoryPid) {
-        gwtCloudService.getCloudServicePidRegex(factoryPid, new AsyncCallback<String>() {
+        this.gwtCloudService.getCloudServicePidRegex(factoryPid, new AsyncCallback<String>() {
 
             @Override
             public void onFailure(Throwable caught) {
-                FailureHandler.handle(caught, gwtCloudService.getClass().getSimpleName());
+                FailureHandler.handle(caught, CloudInstancesUi.this.gwtCloudService.getClass().getSimpleName());
             }
 
             @Override
             public void onSuccess(String result) {
                 if (result != null) {
-                    regexValidator = new RegExValidator(result);
+                    CloudInstancesUi.this.regexValidator = new RegExValidator(result);
                 } else {
-                    regexValidator = new RegExValidator(".+");
+                    CloudInstancesUi.this.regexValidator = new RegExValidator(".+");
                 }
-                cloudServicePid.addValidator(regexValidator);
-                cloudServicePid.addKeyUpHandler(new KeyUpHandler() {
-                    
+                CloudInstancesUi.this.cloudServicePid.addValidator(CloudInstancesUi.this.regexValidator);
+                CloudInstancesUi.this.cloudServicePid.addKeyUpHandler(new KeyUpHandler() {
+
                     @Override
                     public void onKeyUp(KeyUpEvent event) {
-                        cloudServicePid.validate();
+                        CloudInstancesUi.this.cloudServicePid.validate();
                     }
                 });
-                cloudServicePid.addBlurHandler(new BlurHandler() {
-                    
+                CloudInstancesUi.this.cloudServicePid.addBlurHandler(new BlurHandler() {
+
                     @Override
                     public void onBlur(BlurEvent event) {
-                        cloudServicePid.validate();
+                        CloudInstancesUi.this.cloudServicePid.validate();
                     }
                 });
             }
