@@ -17,21 +17,22 @@ import org.eclipse.kura.web.client.util.KuraBaseModel;
 
 public class GwtCloudConnectionEntry extends KuraBaseModel implements Serializable {
 
-	/**
-     * 
+    /**
+     *
      */
     private static final long serialVersionUID = 3373858744219238675L;
 
-    public GwtCloudConnectionEntry() {}
-    
+    public GwtCloudConnectionEntry() {
+    }
+
     public boolean isConnected() {
-    	return get("connectionStatus");
+        return get("connectionStatus");
     }
-    
+
     public void setConnectionStatus(boolean isConnected) {
-    	set("connectionStatus", isConnected);
+        set("connectionStatus", isConnected);
     }
-    
+
     public String getCloudFactoryPid() {
         return get("cloudFactoryPid");
     }
@@ -39,7 +40,7 @@ public class GwtCloudConnectionEntry extends KuraBaseModel implements Serializab
     public void setCloudFactoryPid(String cloudFactoryPid) {
         set("cloudFactoryPid", cloudFactoryPid);
     }
-    
+
     public String getCloudServicePid() {
         return get("cloudServicePid");
     }

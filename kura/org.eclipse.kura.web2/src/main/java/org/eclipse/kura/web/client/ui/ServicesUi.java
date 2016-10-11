@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*
  * Render the Content in the Main Panel corressponding to Service (GwtBSConfigComponent) selected in the Services Panel
- * 
+ *
  * Fields are rendered based on their type (Password(Input), Choice(Dropboxes) etc. with Text fields rendered
  * for both numeric and other textual field with validate() checking if value in numeric fields is numeric
  */
@@ -64,7 +64,7 @@ public class ServicesUi extends AbstractServicesUi {
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
     private boolean dirty, initialized;
-    private GwtConfigComponent originalConfig;
+    private final GwtConfigComponent originalConfig;
 
     NavPills menu;
     PanelBody content;
@@ -93,14 +93,14 @@ public class ServicesUi extends AbstractServicesUi {
     //
     public ServicesUi(final GwtConfigComponent addedItem, EntryClassUi entryClassUi) {
         initWidget(uiBinder.createAndBindUi(this));
-        initialized = false;
-        entryClass = entryClassUi;
-        originalConfig = addedItem;
-        restoreConfiguration(originalConfig);
-        fields.clear();
+        this.initialized = false;
+        this.entryClass = entryClassUi;
+        this.originalConfig = addedItem;
+        restoreConfiguration(this.originalConfig);
+        this.fields.clear();
 
-        apply.setText(MSGS.apply());
-        apply.addClickHandler(new ClickHandler() {
+        this.apply.setText(MSGS.apply());
+        this.apply.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -108,8 +108,8 @@ public class ServicesUi extends AbstractServicesUi {
             }
         });
 
-        reset.setText(MSGS.reset());
-        reset.addClickHandler(new ClickHandler() {
+        this.reset.setText(MSGS.reset());
+        this.reset.addClickHandler(new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
@@ -120,37 +120,37 @@ public class ServicesUi extends AbstractServicesUi {
         initInvalidDataModal();
 
         setDirty(false);
-        apply.setEnabled(false);
-        reset.setEnabled(false);
+        this.apply.setEnabled(false);
+        this.reset.setEnabled(false);
     }
 
     @Override
     public void setDirty(boolean flag) {
-        dirty = flag;
-        if (dirty && initialized) {
-            apply.setEnabled(true);
-            reset.setEnabled(true);
+        this.dirty = flag;
+        if (this.dirty && this.initialized) {
+            this.apply.setEnabled(true);
+            this.reset.setEnabled(true);
         }
     }
 
     @Override
     public boolean isDirty() {
-        return dirty;
+        return this.dirty;
     }
 
     @Override
     public void reset() {
         if (isDirty()) {
             // Modal
-            modal = new Modal();
+            this.modal = new Modal();
 
             ModalHeader header = new ModalHeader();
             header.setTitle(MSGS.confirm());
-            modal.add(header);
+            this.modal.add(header);
 
             ModalBody body = new ModalBody();
             body.add(new Span(MSGS.deviceConfigDirty()));
-            modal.add(body);
+            this.modal.add(body);
 
             ModalFooter footer = new ModalFooter();
             ButtonGroup group = new ButtonGroup();
@@ -160,13 +160,13 @@ public class ServicesUi extends AbstractServicesUi {
 
                 @Override
                 public void onClick(ClickEvent event) {
-                    modal.hide();
-                    restoreConfiguration(originalConfig);
+                    ServicesUi.this.modal.hide();
+                    restoreConfiguration(ServicesUi.this.originalConfig);
                     renderForm();
-                    apply.setEnabled(false);
-                    reset.setEnabled(false);
+                    ServicesUi.this.apply.setEnabled(false);
+                    ServicesUi.this.reset.setEnabled(false);
                     setDirty(false);
-                    entryClass.initServicesTree();
+                    ServicesUi.this.entryClass.initServicesTree();
                 }
             });
             group.add(yes);
@@ -176,14 +176,14 @@ public class ServicesUi extends AbstractServicesUi {
 
                 @Override
                 public void onClick(ClickEvent event) {
-                    modal.hide();
+                    ServicesUi.this.modal.hide();
                 }
             });
             group.add(no);
             footer.add(group);
-            modal.add(footer);
-            modal.show();
-        }                 // end is dirty
+            this.modal.add(footer);
+            this.modal.show();
+        }                    // end is dirty
     }
 
     // TODO: Separate render methods for each type (ex: Boolean, String,
@@ -192,8 +192,8 @@ public class ServicesUi extends AbstractServicesUi {
     // GwtConfigComponent
     @Override
     public void renderForm() {
-        fields.clear();
-        for (GwtConfigParameter param : m_configurableComponent.getParameters()) {
+        this.fields.clear();
+        for (GwtConfigParameter param : this.m_configurableComponent.getParameters()) {
             if (param.getCardinality() == 0 || param.getCardinality() == 1 || param.getCardinality() == -1) {
                 FormGroup formGroup = new FormGroup();
                 renderConfigParameter(param, true, formGroup);
@@ -201,31 +201,31 @@ public class ServicesUi extends AbstractServicesUi {
                 renderMultiFieldConfigParameter(param);
             }
         }
-        initialized = true;
+        this.initialized = true;
     }
 
     @Override
     protected void renderTextField(final GwtConfigParameter param, boolean isFirstInstance, final FormGroup formGroup) {
         super.renderTextField(param, isFirstInstance, formGroup);
-        fields.add(formGroup);
+        this.fields.add(formGroup);
     }
 
     @Override
     protected void renderPasswordField(final GwtConfigParameter param, boolean isFirstInstance, FormGroup formGroup) {
         super.renderPasswordField(param, isFirstInstance, formGroup);
-        fields.add(formGroup);
+        this.fields.add(formGroup);
     }
 
     @Override
     protected void renderBooleanField(final GwtConfigParameter param, boolean isFirstInstance, FormGroup formGroup) {
         super.renderBooleanField(param, isFirstInstance, formGroup);
-        fields.add(formGroup);
+        this.fields.add(formGroup);
     }
 
     @Override
     protected void renderChoiceField(final GwtConfigParameter param, boolean isFirstInstance, FormGroup formGroup) {
         super.renderChoiceField(param, isFirstInstance, formGroup);
-        fields.add(formGroup);
+        this.fields.add(formGroup);
     }
 
     //
@@ -235,15 +235,15 @@ public class ServicesUi extends AbstractServicesUi {
         if (isValid()) {
             if (isDirty()) {
                 // TODO ask for confirmation first
-                modal = new Modal();
+                this.modal = new Modal();
 
                 ModalHeader header = new ModalHeader();
                 header.setTitle(MSGS.confirm());
-                modal.add(header);
+                this.modal.add(header);
 
                 ModalBody body = new ModalBody();
-                body.add(new Span(MSGS.deviceConfigConfirmation(m_configurableComponent.getComponentName())));
-                modal.add(body);
+                body.add(new Span(MSGS.deviceConfigConfirmation(this.m_configurableComponent.getComponentName())));
+                this.modal.add(body);
 
                 ModalFooter footer = new ModalFooter();
                 ButtonGroup group = new ButtonGroup();
@@ -261,7 +261,7 @@ public class ServicesUi extends AbstractServicesUi {
                             FailureHandler.handle(ex);
                             return;
                         }
-                        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+                        ServicesUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                             @Override
                             public void onFailure(Throwable ex) {
@@ -271,8 +271,8 @@ public class ServicesUi extends AbstractServicesUi {
 
                             @Override
                             public void onSuccess(GwtXSRFToken token) {
-                                gwtComponentService.updateComponentConfiguration(token, m_configurableComponent,
-                                        new AsyncCallback<Void>() {
+                                ServicesUi.this.gwtComponentService.updateComponentConfiguration(token,
+                                        ServicesUi.this.m_configurableComponent, new AsyncCallback<Void>() {
 
                                     @Override
                                     public void onFailure(Throwable caught) {
@@ -286,12 +286,12 @@ public class ServicesUi extends AbstractServicesUi {
 
                                     @Override
                                     public void onSuccess(Void result) {
-                                        modal.hide();
+                                        ServicesUi.this.modal.hide();
                                         logger.info(MSGS.info() + ": " + MSGS.deviceConfigApplied());
-                                        apply.setEnabled(false);
-                                        reset.setEnabled(false);
+                                        ServicesUi.this.apply.setEnabled(false);
+                                        ServicesUi.this.reset.setEnabled(false);
                                         setDirty(false);
-                                        entryClass.initServicesTree();
+                                        ServicesUi.this.entryClass.initServicesTree();
                                         EntryClassUi.hideWaitModal();
                                     }
                                 });
@@ -307,25 +307,25 @@ public class ServicesUi extends AbstractServicesUi {
 
                     @Override
                     public void onClick(ClickEvent event) {
-                        modal.hide();
+                        ServicesUi.this.modal.hide();
                     }
                 });
                 group.add(no);
                 footer.add(group);
-                modal.add(footer);
-                modal.show();
+                this.modal.add(footer);
+                this.modal.show();
 
                 // ----
 
-            }                 // end isDirty()
+            }                    // end isDirty()
         } else {
             errorLogger.log(Level.SEVERE, "Device configuration error!");
-            incompleteFieldsModal.show();
-        }                 // end else isValid
+            this.incompleteFieldsModal.show();
+        }                    // end else isValid
     }
 
     private GwtConfigComponent getUpdatedConfiguration() {
-        Iterator<Widget> it = fields.iterator();
+        Iterator<Widget> it = this.fields.iterator();
         while (it.hasNext()) {
             Widget w = it.next();
             if (w instanceof FormGroup) {
@@ -333,11 +333,11 @@ public class ServicesUi extends AbstractServicesUi {
                 fillUpdatedConfiguration(fg);
             }
         }
-        return m_configurableComponent;
+        return this.m_configurableComponent;
     }
 
     private void initInvalidDataModal() {
-        incompleteFieldsModal.setTitle(MSGS.warning());
-        incompleteFieldsText.setText(MSGS.formWithErrorsOrIncomplete());
+        this.incompleteFieldsModal.setTitle(MSGS.warning());
+        this.incompleteFieldsText.setText(MSGS.formWithErrorsOrIncomplete());
     }
 }

@@ -59,7 +59,7 @@ import org.osgi.service.component.ComponentConstants;
  * <br>
  * The default stack instance is special.
  * For backward compatibility the PIDs of the default stack must be as follows:
- * 
+ *
  * <table>
  * <thead>
  * <tr>
@@ -83,11 +83,11 @@ import org.osgi.service.component.ComponentConstants;
  * </tbody>
  * </table>
  * <br>
- * 
+ *
  * For other stack instances the convention used to generate the PIDs for the lower layers is
  * to use the sub string in the CloudService PID starting after the first occurrence of the '-' character and append
  * the sub string to the PIDs of the default stack above, for example:
- * 
+ *
  * <table>
  * <thead>
  * <tr>
@@ -120,7 +120,7 @@ import org.osgi.service.component.ComponentConstants;
  * The following example shows this selective dependency mechanism for the DataService and MqttDataTransport services.
  * <br>
  * The DataService component definition specifies a dependency on a DataTransportService as follows:
- * 
+ *
  * <pre>
  * &ltreference name="DataTransportService"
  *              bind="setDataTransportService"
@@ -129,7 +129,7 @@ import org.osgi.service.component.ComponentConstants;
  *              policy="static"
  *              interface="org.eclipse.kura.data.DataTransportService"/&gt
  * </pre>
- * 
+ *
  * <br>
  * The DataService with PID <i>org.eclipse.kura.data.DataService-2</i> needs to be activated
  * only when its dependency on a specific DataTransportService with
@@ -140,11 +140,11 @@ import org.osgi.service.component.ComponentConstants;
  * <br>
  * In the above example the <i>org.eclipse.kura.data.DataService-2</i> component instance will have a
  * <i>DataTransportService.target</i> property set to the value:
- * 
+ *
  * <pre>
  * (kura.service.pid = org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport - 2)
  * </pre>
- * 
+ *
  * <br>
  */
 public class DefaultCloudServiceFactory implements CloudServiceFactory {
@@ -168,12 +168,12 @@ public class DefaultCloudServiceFactory implements CloudServiceFactory {
     private ConfigurationService m_configurationService;
 
     protected void setConfigurationService(ConfigurationService configurationService) {
-        m_configurationService = configurationService;
+        this.m_configurationService = configurationService;
     }
 
     protected void unsetConfigurationService(ConfigurationService configurationService) {
-        if (configurationService == m_configurationService) {
-            m_configurationService = null;
+        if (configurationService == this.m_configurationService) {
+            this.m_configurationService = null;
         }
     }
 
@@ -204,17 +204,20 @@ public class DefaultCloudServiceFactory implements CloudServiceFactory {
             cloudServiceProperties.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, dataServicePid));
             cloudServiceProperties.put(KURA_CLOUD_SERVICE_FACTORY_PID, FACTORY_PID);
 
-            m_configurationService.createFactoryConfiguration(CLOUD_SERVICE_FACTORY_PID, pid, cloudServiceProperties, false);
+            this.m_configurationService.createFactoryConfiguration(CLOUD_SERVICE_FACTORY_PID, pid,
+                    cloudServiceProperties, false);
 
             // create the DataService layer and set the selective dependency on the DataTransportService PID
             Map<String, Object> dataServiceProperties = new HashMap<String, Object>();
             name = DATA_TRANSPORT_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX;
             dataServiceProperties.put(name, String.format(REFERENCE_TARGET_VALUE_FORMAT, dataTransportServicePid));
 
-            m_configurationService.createFactoryConfiguration(DATA_SERVICE_FACTORY_PID, dataServicePid, dataServiceProperties, false);
+            this.m_configurationService.createFactoryConfiguration(DATA_SERVICE_FACTORY_PID, dataServicePid,
+                    dataServiceProperties, false);
 
             // create the DataTransportService layer and take a snapshot
-            m_configurationService.createFactoryConfiguration(DATA_TRANSPORT_SERVICE_FACTORY_PID, dataTransportServicePid, null, true);
+            this.m_configurationService.createFactoryConfiguration(DATA_TRANSPORT_SERVICE_FACTORY_PID,
+                    dataTransportServicePid, null, true);
         } else {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Invalid PID '{}'", pid);
         }
@@ -236,9 +239,9 @@ public class DefaultCloudServiceFactory implements CloudServiceFactory {
                 dataTransportServicePid += "-" + suffix;
             }
 
-            m_configurationService.deleteFactoryConfiguration(pid, false);
-            m_configurationService.deleteFactoryConfiguration(dataServicePid, false);
-            m_configurationService.deleteFactoryConfiguration(dataTransportServicePid, true);
+            this.m_configurationService.deleteFactoryConfiguration(pid, false);
+            this.m_configurationService.deleteFactoryConfiguration(dataServicePid, false);
+            this.m_configurationService.deleteFactoryConfiguration(dataTransportServicePid, true);
         }
     }
 

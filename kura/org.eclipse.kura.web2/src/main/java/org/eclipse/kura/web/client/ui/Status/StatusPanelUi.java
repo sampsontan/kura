@@ -48,151 +48,165 @@ import com.google.gwt.view.client.ListDataProvider;
 
 public class StatusPanelUi extends Composite {
 
-	private static final Logger logger = Logger.getLogger(StatusPanelUi.class.getSimpleName());
-	private static StatusPanelUiUiBinder uiBinder = GWT.create(StatusPanelUiUiBinder.class);
+    private static final Logger logger = Logger.getLogger(StatusPanelUi.class.getSimpleName());
+    private static StatusPanelUiUiBinder uiBinder = GWT.create(StatusPanelUiUiBinder.class);
 
-	interface StatusPanelUiUiBinder extends UiBinder<Widget, StatusPanelUi> {
-	}
+    interface StatusPanelUiUiBinder extends UiBinder<Widget, StatusPanelUi> {
+    }
 
-	
-	private static final ValidationMessages msgs = GWT.create(ValidationMessages.class);
-	private static final Messages MSG = GWT.create(Messages.class);
-	
-	private final GwtStatusServiceAsync gwtStatusService = GWT.create(GwtStatusService.class);
-	private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-	
-	private GwtSession currentSession;
-	private ListDataProvider<GwtGroupedNVPair> statusGridProvider = new ListDataProvider<GwtGroupedNVPair>();
-	private EntryClassUi parent;
+    private static final ValidationMessages msgs = GWT.create(ValidationMessages.class);
+    private static final Messages MSG = GWT.create(Messages.class);
 
-	@UiField
-	Well statusWell;
-	@UiField
-	Button statusRefresh;
-	@UiField
-	CellTable<GwtGroupedNVPair> statusGrid = new CellTable<GwtGroupedNVPair>();
+    private final GwtStatusServiceAsync gwtStatusService = GWT.create(GwtStatusService.class);
+    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
-	public StatusPanelUi() {
-		logger.log(Level.FINER, "Initializing StatusPanelUi...");
-		initWidget(uiBinder.createAndBindUi(this));
-		// Set text for buttons
-		statusRefresh.setText(MSG.refresh());
+    private GwtSession currentSession;
+    private final ListDataProvider<GwtGroupedNVPair> statusGridProvider = new ListDataProvider<GwtGroupedNVPair>();
+    private EntryClassUi parent;
 
-		statusGrid.setRowStyles(new RowStyles<GwtGroupedNVPair>() {
-			@Override
-			public String getStyleNames(GwtGroupedNVPair row, int rowIndex) {
-				if ("Cloud Services".equals(row.getName()) ||
-				        "Connection Name".equals(row.getName()) ||
-						"Ethernet Settings".equals(row.getName()) ||
-						"Wireless Settings".equals(row.getName()) ||
-						"Cellular Settings".equals(row.getName()) ||
-						"Position Status".equals(row.getName())) {
-					return "rowHeader";
-				}
-				else return " ";
-			}
-		});
+    @UiField
+    Well statusWell;
+    @UiField
+    Button statusRefresh;
+    @UiField
+    CellTable<GwtGroupedNVPair> statusGrid = new CellTable<GwtGroupedNVPair>();
 
-		loadStatusTable(statusGrid, statusGridProvider);		
-		
-		statusRefresh.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				loadStatusData();
-			}
-		});
-	}
+    public StatusPanelUi() {
+        logger.log(Level.FINER, "Initializing StatusPanelUi...");
+        initWidget(uiBinder.createAndBindUi(this));
+        // Set text for buttons
+        this.statusRefresh.setText(MSG.refresh());
 
-	// get current session from UI parent
-	public void setSession(GwtSession gwtBSSession) {
-		currentSession = gwtBSSession;
-	}
+        this.statusGrid.setRowStyles(new RowStyles<GwtGroupedNVPair>() {
 
-	// create table layout
-	public void loadStatusTable(CellTable<GwtGroupedNVPair> grid, ListDataProvider<GwtGroupedNVPair> dataProvider) {
-		TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
+            @Override
+            public String getStyleNames(GwtGroupedNVPair row, int rowIndex) {
+                if ("Cloud Services".equals(row.getName()) || "Connection Name".equals(row.getName())
+                        || "Ethernet Settings".equals(row.getName()) || "Wireless Settings".equals(row.getName())
+                        || "Cellular Settings".equals(row.getName()) || "Position Status".equals(row.getName())) {
+                    return "rowHeader";
+                } else {
+                    return " ";
+                }
+            }
+        });
 
-			@Override
-			public String getValue(GwtGroupedNVPair object) {
-				return String.valueOf(object.getName());
-			}
-		};
-		col1.setCellStyleNames("status-table-row");
-		grid.addColumn(col1);
+        loadStatusTable(this.statusGrid, this.statusGridProvider);
 
-		Column<GwtGroupedNVPair, SafeHtml> col2 = new Column<GwtGroupedNVPair, SafeHtml>(new SafeHtmlCell()) {
+        this.statusRefresh.addClickHandler(new ClickHandler() {
 
-			public SafeHtml getValue(GwtGroupedNVPair object) {
-				return SafeHtmlUtils.fromTrustedString(String.valueOf(object.getValue()));
-			}
-		};
-		
-		col2.setCellStyleNames("status-table-row");
-		grid.addColumn(col2);
-		dataProvider.addDataDisplay(grid);
-	}
+            @Override
+            public void onClick(ClickEvent event) {
+                loadStatusData();
+            }
+        });
+    }
 
-	// fetch table data
-	public void loadStatusData() {
-		statusGridProvider.getList().clear();
-		EntryClassUi.showWaitModal();
-		gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken> () {
+    // get current session from UI parent
+    public void setSession(GwtSession gwtBSSession) {
+        this.currentSession = gwtBSSession;
+    }
 
-			@Override
-			public void onFailure(Throwable ex) {
-				EntryClassUi.hideWaitModal();
-				FailureHandler.handle(ex);
-			}
-			
-			@Override
-			public void onSuccess(GwtXSRFToken token) {
-				gwtStatusService.getDeviceConfig(token, currentSession.isNetAdminAvailable(),
-						new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
-							@Override
-							public void onFailure(Throwable caught) {
-								FailureHandler.handle(caught);
-								statusGridProvider.flush();
-								EntryClassUi.hideWaitModal();
-							}
+    // create table layout
+    public void loadStatusTable(CellTable<GwtGroupedNVPair> grid, ListDataProvider<GwtGroupedNVPair> dataProvider) {
+        TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
 
-							@Override
-							public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
-								String title = "cloudStatus";
-								statusGridProvider.getList().add(new GwtGroupedNVPair(" ",msgs.getString(title), " "));
-								
-                                parent.updateConnectionStatusImage(false);
-                                
-								int connectionNameIndex= 0;
-								
-								for (GwtGroupedNVPair resultPair : result) {
-									if ("Connection Name".equals(resultPair.getName()) && resultPair.getValue().endsWith("CloudService")) {
-										GwtGroupedNVPair connectionStatus= result.get(connectionNameIndex + 1); // done based on the idea that in the pairs data connection name is before connection status
-										
-										if ("Service Status".equals(connectionStatus.getName()) && "CONNECTED".equals(connectionStatus.getValue())) {
-											parent.updateConnectionStatusImage(true);
-										} else {
-											parent.updateConnectionStatusImage(false);
-										}
-									}
-									connectionNameIndex++;
-									
-									if (!title.equals(resultPair.getGroup())) {
-										title = resultPair.getGroup();
-										statusGridProvider.getList().add(new GwtGroupedNVPair(" ", msgs.getString(title), " "));
-									}
-									statusGridProvider.getList().add(resultPair);
-								}
-								int size= statusGridProvider.getList().size();
-								statusGrid.setVisibleRange(0, size);
-								statusGridProvider.flush();
-								EntryClassUi.hideWaitModal();
-							}
-						});
-			}
-		});
-	}
-	
-	public void setParent(EntryClassUi parent) {
-		this.parent= parent;
-	}
+            @Override
+            public String getValue(GwtGroupedNVPair object) {
+                return String.valueOf(object.getName());
+            }
+        };
+        col1.setCellStyleNames("status-table-row");
+        grid.addColumn(col1);
+
+        Column<GwtGroupedNVPair, SafeHtml> col2 = new Column<GwtGroupedNVPair, SafeHtml>(new SafeHtmlCell()) {
+
+            @Override
+            public SafeHtml getValue(GwtGroupedNVPair object) {
+                return SafeHtmlUtils.fromTrustedString(String.valueOf(object.getValue()));
+            }
+        };
+
+        col2.setCellStyleNames("status-table-row");
+        grid.addColumn(col2);
+        dataProvider.addDataDisplay(grid);
+    }
+
+    // fetch table data
+    public void loadStatusData() {
+        this.statusGridProvider.getList().clear();
+        EntryClassUi.showWaitModal();
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(Throwable ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex);
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                StatusPanelUi.this.gwtStatusService.getDeviceConfig(token,
+                        StatusPanelUi.this.currentSession.isNetAdminAvailable(),
+                        new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        FailureHandler.handle(caught);
+                        StatusPanelUi.this.statusGridProvider.flush();
+                        EntryClassUi.hideWaitModal();
+                    }
+
+                    @Override
+                    public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+                        String title = "cloudStatus";
+                        StatusPanelUi.this.statusGridProvider.getList()
+                                .add(new GwtGroupedNVPair(" ", msgs.getString(title), " "));
+
+                        StatusPanelUi.this.parent.updateConnectionStatusImage(false);
+
+                        int connectionNameIndex = 0;
+
+                        for (GwtGroupedNVPair resultPair : result) {
+                            if ("Connection Name".equals(resultPair.getName())
+                                    && resultPair.getValue().endsWith("CloudService")) {
+                                GwtGroupedNVPair connectionStatus = result.get(connectionNameIndex + 1); // done based
+                                // on the idea
+                                // that in the
+                                // pairs data
+                                // connection
+                                // name is
+                                // before
+                                // connection
+                                // status
+
+                                if ("Service Status".equals(connectionStatus.getName())
+                                        && "CONNECTED".equals(connectionStatus.getValue())) {
+                                    StatusPanelUi.this.parent.updateConnectionStatusImage(true);
+                                } else {
+                                    StatusPanelUi.this.parent.updateConnectionStatusImage(false);
+                                }
+                            }
+                            connectionNameIndex++;
+
+                            if (!title.equals(resultPair.getGroup())) {
+                                title = resultPair.getGroup();
+                                StatusPanelUi.this.statusGridProvider.getList()
+                                        .add(new GwtGroupedNVPair(" ", msgs.getString(title), " "));
+                            }
+                            StatusPanelUi.this.statusGridProvider.getList().add(resultPair);
+                        }
+                        int size = StatusPanelUi.this.statusGridProvider.getList().size();
+                        StatusPanelUi.this.statusGrid.setVisibleRange(0, size);
+                        StatusPanelUi.this.statusGridProvider.flush();
+                        EntryClassUi.hideWaitModal();
+                    }
+                });
+            }
+        });
+    }
+
+    public void setParent(EntryClassUi parent) {
+        this.parent = parent;
+    }
 }
